@@ -1,0 +1,2034 @@
+{
+  "endpoint_name": null,
+  "description": "A simple but powerful starter agent.",
+  "id": "8219c178-8157-4fb4-aac2-56dd5d4633fd",
+  "name": "Автоматизация рутинных аналитических з (1)",
+  "data": {
+    "nodes": [
+      {
+        "id": "ChatInput-9hVfd",
+        "type": "genericNode",
+        "position": {
+          "x": 832.3923462229048,
+          "y": 663.4459862627277
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "files": {
+                "trace_as_metadata": true,
+                "file_path": "",
+                "fileTypes": [
+                  "txt",
+                  "md",
+                  "mdx",
+                  "csv",
+                  "json",
+                  "yaml",
+                  "yml",
+                  "xml",
+                  "html",
+                  "htm",
+                  "pdf",
+                  "docx",
+                  "py",
+                  "sh",
+                  "sql",
+                  "js",
+                  "ts",
+                  "tsx",
+                  "jpg",
+                  "jpeg",
+                  "png",
+                  "bmp",
+                  "image"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "files",
+                "value": "",
+                "display_name": "Files",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Files to be sent with the message.",
+                "title_case": false,
+                "type": "file",
+                "_input_type": "FileInput"
+              },
+              "background_color": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "background_color",
+                "value": "",
+                "display_name": "Background Color",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The background color of the icon.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "chat_icon": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "chat_icon",
+                "value": "",
+                "display_name": "Icon",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The icon of the message.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "from langflow.base.data.utils import IMG_FILE_TYPES, TEXT_FILE_TYPES\nfrom langflow.base.io.chat import ChatComponent\nfrom langflow.inputs import BoolInput\nfrom langflow.io import (\n    DropdownInput,\n    FileInput,\n    MessageTextInput,\n    MultilineInput,\n    Output,\n)\nfrom langflow.schema.message import Message\nfrom langflow.utils.constants import (\n    MESSAGE_SENDER_AI,\n    MESSAGE_SENDER_NAME_USER,\n    MESSAGE_SENDER_USER,\n)\n\n\nclass ChatInput(ChatComponent):\n    display_name = \"Chat Input\"\n    description = \"Get chat inputs from the Playground.\"\n    icon = \"MessagesSquare\"\n    name = \"ChatInput\"\n    minimized = True\n\n    inputs = [\n        MultilineInput(\n            name=\"input_value\",\n            display_name=\"Text\",\n            value=\"\",\n            info=\"Message to be passed as input.\",\n            input_types=[],\n        ),\n        BoolInput(\n            name=\"should_store_message\",\n            display_name=\"Store Messages\",\n            info=\"Store the message in the history.\",\n            value=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"sender\",\n            display_name=\"Sender Type\",\n            options=[MESSAGE_SENDER_AI, MESSAGE_SENDER_USER],\n            value=MESSAGE_SENDER_USER,\n            info=\"Type of sender.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"sender_name\",\n            display_name=\"Sender Name\",\n            info=\"Name of the sender.\",\n            value=MESSAGE_SENDER_NAME_USER,\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"session_id\",\n            display_name=\"Session ID\",\n            info=\"The session ID of the chat. If empty, the current session ID parameter will be used.\",\n            advanced=True,\n        ),\n        FileInput(\n            name=\"files\",\n            display_name=\"Files\",\n            file_types=TEXT_FILE_TYPES + IMG_FILE_TYPES,\n            info=\"Files to be sent with the message.\",\n            advanced=True,\n            is_list=True,\n        ),\n        MessageTextInput(\n            name=\"background_color\",\n            display_name=\"Background Color\",\n            info=\"The background color of the icon.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"chat_icon\",\n            display_name=\"Icon\",\n            info=\"The icon of the message.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"text_color\",\n            display_name=\"Text Color\",\n            info=\"The text color of the name\",\n            advanced=True,\n        ),\n    ]\n    outputs = [\n        Output(display_name=\"Message\", name=\"message\", method=\"message_response\"),\n    ]\n\n    async def message_response(self) -> Message:\n        background_color = self.background_color\n        text_color = self.text_color\n        icon = self.chat_icon\n\n        message = await Message.create(\n            text=self.input_value,\n            sender=self.sender,\n            sender_name=self.sender_name,\n            session_id=self.session_id,\n            files=self.files,\n            properties={\n                \"background_color\": background_color,\n                \"text_color\": text_color,\n                \"icon\": icon,\n            },\n        )\n        if self.session_id and isinstance(message, Message) and self.should_store_message:\n            stored_message = await self.send_message(\n                message,\n            )\n            self.message.value = stored_message\n            message = stored_message\n\n        self.status = message\n        return message\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "input_value": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "multiline": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "input_value",
+                "value": "",
+                "display_name": "Text",
+                "advanced": false,
+                "input_types": [],
+                "dynamic": false,
+                "info": "Message to be passed as input.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MultilineInput"
+              },
+              "sender": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "options_metadata": [],
+                "combobox": false,
+                "dialog_inputs": {},
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "sender",
+                "value": "User",
+                "display_name": "Sender Type",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Type of sender.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "DropdownInput"
+              },
+              "sender_name": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "sender_name",
+                "value": "User",
+                "display_name": "Sender Name",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "Name of the sender.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "session_id": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "session_id",
+                "value": "",
+                "display_name": "Session ID",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The session ID of the chat. If empty, the current session ID parameter will be used.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "should_store_message": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "should_store_message",
+                "value": true,
+                "display_name": "Store Messages",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Store the message in the history.",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "text_color": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "text_color",
+                "value": "",
+                "display_name": "Text Color",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The text color of the name",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              }
+            },
+            "description": "Get chat inputs from the Playground.",
+            "icon": "MessagesSquare",
+            "base_classes": [
+              "Message"
+            ],
+            "display_name": "Chat Input",
+            "documentation": "",
+            "minimized": true,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "message",
+                "display_name": "Message",
+                "method": "message_response",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id",
+              "files",
+              "background_color",
+              "chat_icon",
+              "text_color"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": false
+          },
+          "showNode": false,
+          "type": "ChatInput",
+          "id": "ChatInput-9hVfd"
+        },
+        "selected": false,
+        "measured": {
+          "width": 192,
+          "height": 66
+        },
+        "dragging": false
+      },
+      {
+        "id": "ChatOutput-zu1DT",
+        "type": "genericNode",
+        "position": {
+          "x": 2312.1592441117396,
+          "y": 587.4972157686543
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "input_value",
+                "value": "",
+                "display_name": "Text",
+                "advanced": false,
+                "input_types": [
+                  "Data",
+                  "DataFrame",
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "Message to be passed as output.",
+                "title_case": false,
+                "type": "other",
+                "_input_type": "HandleInput"
+              },
+              "background_color": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "background_color",
+                "value": "",
+                "display_name": "Background Color",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The background color of the icon.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "chat_icon": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "chat_icon",
+                "value": "",
+                "display_name": "Icon",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The icon of the message.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "clean_data": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "clean_data",
+                "value": true,
+                "display_name": "Basic Clean Data",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Whether to clean the data",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "from collections.abc import Generator\nfrom typing import Any\n\nfrom langflow.base.io.chat import ChatComponent\nfrom langflow.inputs import BoolInput\nfrom langflow.inputs.inputs import HandleInput\nfrom langflow.io import DropdownInput, MessageTextInput, Output\nfrom langflow.schema.data import Data\nfrom langflow.schema.dataframe import DataFrame\nfrom langflow.schema.message import Message\nfrom langflow.schema.properties import Source\nfrom langflow.utils.constants import (\n    MESSAGE_SENDER_AI,\n    MESSAGE_SENDER_NAME_AI,\n    MESSAGE_SENDER_USER,\n)\n\n\nclass ChatOutput(ChatComponent):\n    display_name = \"Chat Output\"\n    description = \"Display a chat message in the Playground.\"\n    icon = \"MessagesSquare\"\n    name = \"ChatOutput\"\n    minimized = True\n\n    inputs = [\n        HandleInput(\n            name=\"input_value\",\n            display_name=\"Text\",\n            info=\"Message to be passed as output.\",\n            input_types=[\"Data\", \"DataFrame\", \"Message\"],\n            required=True,\n        ),\n        BoolInput(\n            name=\"should_store_message\",\n            display_name=\"Store Messages\",\n            info=\"Store the message in the history.\",\n            value=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"sender\",\n            display_name=\"Sender Type\",\n            options=[MESSAGE_SENDER_AI, MESSAGE_SENDER_USER],\n            value=MESSAGE_SENDER_AI,\n            advanced=True,\n            info=\"Type of sender.\",\n        ),\n        MessageTextInput(\n            name=\"sender_name\",\n            display_name=\"Sender Name\",\n            info=\"Name of the sender.\",\n            value=MESSAGE_SENDER_NAME_AI,\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"session_id\",\n            display_name=\"Session ID\",\n            info=\"The session ID of the chat. If empty, the current session ID parameter will be used.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"data_template\",\n            display_name=\"Data Template\",\n            value=\"{text}\",\n            advanced=True,\n            info=\"Template to convert Data to Text. If left empty, it will be dynamically set to the Data's text key.\",\n        ),\n        MessageTextInput(\n            name=\"background_color\",\n            display_name=\"Background Color\",\n            info=\"The background color of the icon.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"chat_icon\",\n            display_name=\"Icon\",\n            info=\"The icon of the message.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"text_color\",\n            display_name=\"Text Color\",\n            info=\"The text color of the name\",\n            advanced=True,\n        ),\n        BoolInput(\n            name=\"clean_data\",\n            display_name=\"Basic Clean Data\",\n            value=True,\n            info=\"Whether to clean the data\",\n            advanced=True,\n        ),\n    ]\n    outputs = [\n        Output(\n            display_name=\"Message\",\n            name=\"message\",\n            method=\"message_response\",\n        ),\n    ]\n\n    def _build_source(self, id_: str | None, display_name: str | None, source: str | None) -> Source:\n        source_dict = {}\n        if id_:\n            source_dict[\"id\"] = id_\n        if display_name:\n            source_dict[\"display_name\"] = display_name\n        if source:\n            # Handle case where source is a ChatOpenAI object\n            if hasattr(source, \"model_name\"):\n                source_dict[\"source\"] = source.model_name\n            elif hasattr(source, \"model\"):\n                source_dict[\"source\"] = str(source.model)\n            else:\n                source_dict[\"source\"] = str(source)\n        return Source(**source_dict)\n\n    async def message_response(self) -> Message:\n        # First convert the input to string if needed\n        text = self.convert_to_string()\n        # Get source properties\n        source, icon, display_name, source_id = self.get_properties_from_source_component()\n        background_color = self.background_color\n        text_color = self.text_color\n        if self.chat_icon:\n            icon = self.chat_icon\n\n        # Create or use existing Message object\n        if isinstance(self.input_value, Message):\n            message = self.input_value\n            # Update message properties\n            message.text = text\n        else:\n            message = Message(text=text)\n\n        # Set message properties\n        message.sender = self.sender\n        message.sender_name = self.sender_name\n        message.session_id = self.session_id\n        message.flow_id = self.graph.flow_id if hasattr(self, \"graph\") else None\n        message.properties.source = self._build_source(source_id, display_name, source)\n        message.properties.icon = icon\n        message.properties.background_color = background_color\n        message.properties.text_color = text_color\n\n        # Store message if needed\n        if self.session_id and self.should_store_message:\n            stored_message = await self.send_message(message)\n            self.message.value = stored_message\n            message = stored_message\n\n        self.status = message\n        return message\n\n    def _validate_input(self) -> None:\n        \"\"\"Validate the input data and raise ValueError if invalid.\"\"\"\n        if self.input_value is None:\n            msg = \"Input data cannot be None\"\n            raise ValueError(msg)\n        if isinstance(self.input_value, list) and not all(\n            isinstance(item, Message | Data | DataFrame | str) for item in self.input_value\n        ):\n            invalid_types = [\n                type(item).__name__\n                for item in self.input_value\n                if not isinstance(item, Message | Data | DataFrame | str)\n            ]\n            msg = f\"Expected Data or DataFrame or Message or str, got {invalid_types}\"\n            raise TypeError(msg)\n        if not isinstance(\n            self.input_value,\n            Message | Data | DataFrame | str | list | Generator | type(None),\n        ):\n            type_name = type(self.input_value).__name__\n            msg = f\"Expected Data or DataFrame or Message or str, Generator or None, got {type_name}\"\n            raise TypeError(msg)\n\n    def _safe_convert(self, data: Any) -> str:\n        \"\"\"Safely convert input data to string.\"\"\"\n        try:\n            if isinstance(data, str):\n                return data\n            if isinstance(data, Message):\n                return data.get_text()\n            if isinstance(data, Data):\n                if data.get_text() is None:\n                    msg = \"Empty Data object\"\n                    raise ValueError(msg)\n                return data.get_text()\n            if isinstance(data, DataFrame):\n                if self.clean_data:\n                    # Remove empty rows\n                    data = data.dropna(how=\"all\")\n                    # Remove empty lines in each cell\n                    data = data.replace(r\"^\\s*$\", \"\", regex=True)\n                    # Replace multiple newlines with a single newline\n                    data = data.replace(r\"\\n+\", \"\\n\", regex=True)\n                return (\n                    data.replace(r\"\\|\", r\"\\\\|\", regex=True)\n                    .applymap(lambda x: (str(x).replace(\"\\n\", \"<br/>\") if isinstance(x, str) else x))\n                    .to_markdown(index=False)\n                )\n            return str(data)\n        except (ValueError, TypeError, AttributeError) as e:\n            msg = f\"Error converting data: {e!s}\"\n            raise ValueError(msg) from e\n\n    def convert_to_string(self) -> str | Generator[Any, None, None]:\n        \"\"\"Convert input data to string with proper error handling.\"\"\"\n        self._validate_input()\n        if isinstance(self.input_value, list):\n            return \"\\n\".join([self._safe_convert(item) for item in self.input_value])\n        if isinstance(self.input_value, Generator):\n            return self.input_value\n        return self._safe_convert(self.input_value)\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "data_template": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "data_template",
+                "value": "{text}",
+                "display_name": "Data Template",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "Template to convert Data to Text. If left empty, it will be dynamically set to the Data's text key.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "sender": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "options_metadata": [],
+                "combobox": false,
+                "dialog_inputs": {},
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "sender",
+                "value": "Machine",
+                "display_name": "Sender Type",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Type of sender.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "DropdownInput"
+              },
+              "sender_name": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "sender_name",
+                "value": "AI",
+                "display_name": "Sender Name",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "Name of the sender.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "session_id": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "session_id",
+                "value": "",
+                "display_name": "Session ID",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The session ID of the chat. If empty, the current session ID parameter will be used.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "should_store_message": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "should_store_message",
+                "value": true,
+                "display_name": "Store Messages",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Store the message in the history.",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "text_color": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "text_color",
+                "value": "",
+                "display_name": "Text Color",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The text color of the name",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              }
+            },
+            "description": "Display a chat message in the Playground.",
+            "icon": "MessagesSquare",
+            "base_classes": [
+              "Message"
+            ],
+            "display_name": "Chat Output",
+            "documentation": "",
+            "minimized": true,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "message",
+                "display_name": "Message",
+                "method": "message_response",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id",
+              "data_template",
+              "background_color",
+              "chat_icon",
+              "text_color",
+              "clean_data"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": false
+          },
+          "showNode": false,
+          "type": "ChatOutput",
+          "id": "ChatOutput-zu1DT"
+        },
+        "selected": false,
+        "measured": {
+          "width": 192,
+          "height": 66
+        },
+        "dragging": false
+      },
+      {
+        "id": "ToolCallingAgent-nJMXM",
+        "type": "genericNode",
+        "position": {
+          "x": 1774.489519507715,
+          "y": 440.4206136487759
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "chat_history": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": true,
+                "list_add_label": "Add More",
+                "trace_as_input": true,
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "chat_history",
+                "value": "",
+                "display_name": "Chat Memory",
+                "advanced": true,
+                "input_types": [
+                  "Data"
+                ],
+                "dynamic": false,
+                "info": "This input stores the chat history, allowing the agent to remember previous conversations.",
+                "title_case": false,
+                "type": "other",
+                "_input_type": "DataInput"
+              },
+              "llm": {
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "llm",
+                "value": "",
+                "display_name": "Language Model",
+                "advanced": false,
+                "input_types": [
+                  "LanguageModel"
+                ],
+                "dynamic": false,
+                "info": "Language model that the agent utilizes to perform tasks effectively.",
+                "title_case": false,
+                "type": "other",
+                "_input_type": "HandleInput"
+              },
+              "tools": {
+                "trace_as_metadata": true,
+                "list": true,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "tools",
+                "value": "",
+                "display_name": "Tools",
+                "advanced": false,
+                "input_types": [
+                  "Tool"
+                ],
+                "dynamic": false,
+                "info": "These are the tools that the agent can use to help with tasks.",
+                "title_case": false,
+                "type": "other",
+                "_input_type": "HandleInput"
+              },
+              "agent_description": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "multiline": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "agent_description",
+                "value": "A helpful assistant with access to the following tools:",
+                "display_name": "Agent Description [Deprecated]",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The description of the agent. This is only used when in Tool Mode. Defaults to 'A helpful assistant with access to the following tools:' and tools are added dynamically. This feature is deprecated and will be removed in future versions.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MultilineInput"
+              },
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "from langchain.agents import create_tool_calling_agent\nfrom langchain_core.prompts import ChatPromptTemplate\n\nfrom langflow.base.agents.agent import LCToolsAgentComponent\nfrom langflow.custom.custom_component.component import _get_component_toolkit\nfrom langflow.field_typing import Tool\nfrom langflow.inputs import MessageTextInput\nfrom langflow.inputs.inputs import DataInput, HandleInput\nfrom langflow.schema import Data\n\n\nclass ToolCallingAgentComponent(LCToolsAgentComponent):\n    display_name: str = \"Tool Calling Agent\"\n    description: str = \"An agent designed to utilize various tools seamlessly within workflows.\"\n    icon = \"LangChain\"\n    name = \"ToolCallingAgent\"\n\n    inputs = [\n        *LCToolsAgentComponent._base_inputs,\n        HandleInput(\n            name=\"llm\",\n            display_name=\"Language Model\",\n            input_types=[\"LanguageModel\"],\n            required=True,\n            info=\"Language model that the agent utilizes to perform tasks effectively.\",\n        ),\n        MessageTextInput(\n            name=\"system_prompt\",\n            display_name=\"System Prompt\",\n            info=\"System prompt to guide the agent's behavior.\",\n            value=\"You are a helpful assistant that can use tools to answer questions and perform tasks.\",\n        ),\n        DataInput(\n            name=\"chat_history\",\n            display_name=\"Chat Memory\",\n            is_list=True,\n            advanced=True,\n            info=\"This input stores the chat history, allowing the agent to remember previous conversations.\",\n        ),\n    ]\n\n    def get_chat_history_data(self) -> list[Data] | None:\n        return self.chat_history\n\n    def create_agent_runnable(self):\n        messages = [\n            (\"system\", \"{system_prompt}\"),\n            (\"placeholder\", \"{chat_history}\"),\n            (\"human\", \"{input}\"),\n            (\"placeholder\", \"{agent_scratchpad}\"),\n        ]\n        prompt = ChatPromptTemplate.from_messages(messages)\n        self.validate_tool_names()\n        try:\n            return create_tool_calling_agent(self.llm, self.tools or [], prompt)\n        except NotImplementedError as e:\n            message = f\"{self.display_name} does not support tool calling. Please try using a compatible model.\"\n            raise NotImplementedError(message) from e\n\n    async def to_toolkit(self) -> list[Tool]:\n        component_toolkit = _get_component_toolkit()\n        toolkit = component_toolkit(component=self)\n        tools = toolkit.get_tools(callbacks=self.get_langchain_callbacks())\n        if hasattr(self, \"tools_metadata\"):\n            tools = toolkit.update_tools_metadata(tools=tools)\n        return tools\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "handle_parsing_errors": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "handle_parsing_errors",
+                "value": true,
+                "display_name": "Handle Parse Errors",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Should the Agent fix errors when reading user input for better processing?",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "input_value": {
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "input_value",
+                "value": "",
+                "display_name": "Input",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The input provided by the user for the agent to process.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "max_iterations": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "max_iterations",
+                "value": 15,
+                "display_name": "Max Iterations",
+                "advanced": true,
+                "dynamic": false,
+                "info": "The maximum number of attempts the agent can make to complete its task before it stops.",
+                "title_case": false,
+                "type": "int",
+                "_input_type": "IntInput"
+              },
+              "system_prompt": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "system_prompt",
+                "value": "",
+                "display_name": "System Prompt",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "System prompt to guide the agent's behavior.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "verbose": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "verbose",
+                "value": true,
+                "display_name": "Verbose",
+                "advanced": true,
+                "dynamic": false,
+                "info": "",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              }
+            },
+            "description": "An agent designed to utilize various tools seamlessly within workflows.",
+            "icon": "LangChain",
+            "base_classes": [
+              "AgentExecutor",
+              "Message"
+            ],
+            "display_name": "Tool Calling Agent",
+            "documentation": "",
+            "minimized": false,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "AgentExecutor"
+                ],
+                "selected": "AgentExecutor",
+                "name": "agent",
+                "hidden": true,
+                "display_name": "Agent",
+                "method": "build_agent",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": [],
+                "allows_loop": false,
+                "tool_mode": false
+              },
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "response",
+                "hidden": null,
+                "display_name": "Response",
+                "method": "message_response",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": [],
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "tools",
+              "input_value",
+              "handle_parsing_errors",
+              "verbose",
+              "max_iterations",
+              "agent_description",
+              "llm",
+              "system_prompt",
+              "chat_history"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": false,
+            "category": "langchain_utilities",
+            "key": "ToolCallingAgent",
+            "score": 0.01857804455091699
+          },
+          "showNode": true,
+          "type": "ToolCallingAgent",
+          "id": "ToolCallingAgent-nJMXM"
+        },
+        "selected": false,
+        "measured": {
+          "width": 320,
+          "height": 419
+        },
+        "dragging": false
+      },
+      {
+        "id": "GoogleGenerativeAIModel-jfzBY",
+        "type": "genericNode",
+        "position": {
+          "x": 1183.6565171097013,
+          "y": 556.5893798727861
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "api_key": {
+                "load_from_db": false,
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "api_key",
+                "value": "AIzaSyD7zUjKojFcpokb0v_JymHlNP6Pcs97V3U",
+                "display_name": "Google API Key",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "The Google API Key to use for the Google Generative AI.",
+                "real_time_refresh": true,
+                "title_case": false,
+                "password": true,
+                "type": "str",
+                "_input_type": "SecretStrInput"
+              },
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "from typing import Any\n\nimport requests\nfrom loguru import logger\nfrom pydantic.v1 import SecretStr\n\nfrom langflow.base.models.google_generative_ai_constants import GOOGLE_GENERATIVE_AI_MODELS\nfrom langflow.base.models.model import LCModelComponent\nfrom langflow.field_typing import LanguageModel\nfrom langflow.field_typing.range_spec import RangeSpec\nfrom langflow.inputs import DropdownInput, FloatInput, IntInput, SecretStrInput, SliderInput\nfrom langflow.inputs.inputs import BoolInput\nfrom langflow.schema import dotdict\n\n\nclass GoogleGenerativeAIComponent(LCModelComponent):\n    display_name = \"Google Generative AI\"\n    description = \"Generate text using Google Generative AI.\"\n    icon = \"GoogleGenerativeAI\"\n    name = \"GoogleGenerativeAIModel\"\n\n    inputs = [\n        *LCModelComponent._base_inputs,\n        IntInput(\n            name=\"max_output_tokens\", display_name=\"Max Output Tokens\", info=\"The maximum number of tokens to generate.\"\n        ),\n        DropdownInput(\n            name=\"model_name\",\n            display_name=\"Model\",\n            info=\"The name of the model to use.\",\n            options=GOOGLE_GENERATIVE_AI_MODELS,\n            value=\"gemini-1.5-pro\",\n            refresh_button=True,\n            combobox=True,\n        ),\n        SecretStrInput(\n            name=\"api_key\",\n            display_name=\"Google API Key\",\n            info=\"The Google API Key to use for the Google Generative AI.\",\n            required=True,\n            real_time_refresh=True,\n        ),\n        FloatInput(\n            name=\"top_p\",\n            display_name=\"Top P\",\n            info=\"The maximum cumulative probability of tokens to consider when sampling.\",\n            advanced=True,\n        ),\n        SliderInput(\n            name=\"temperature\",\n            display_name=\"Temperature\",\n            value=0.1,\n            range_spec=RangeSpec(min=0, max=2, step=0.01),\n            info=\"Controls randomness. Lower values are more deterministic, higher values are more creative.\",\n        ),\n        IntInput(\n            name=\"n\",\n            display_name=\"N\",\n            info=\"Number of chat completions to generate for each prompt. \"\n            \"Note that the API may not return the full n completions if duplicates are generated.\",\n            advanced=True,\n        ),\n        IntInput(\n            name=\"top_k\",\n            display_name=\"Top K\",\n            info=\"Decode using top-k sampling: consider the set of top_k most probable tokens. Must be positive.\",\n            advanced=True,\n        ),\n        BoolInput(\n            name=\"tool_model_enabled\",\n            display_name=\"Tool Model Enabled\",\n            info=\"Whether to use the tool model.\",\n            value=False,\n        ),\n    ]\n\n    def build_model(self) -> LanguageModel:  # type: ignore[type-var]\n        try:\n            from langchain_google_genai import ChatGoogleGenerativeAI\n        except ImportError as e:\n            msg = \"The 'langchain_google_genai' package is required to use the Google Generative AI model.\"\n            raise ImportError(msg) from e\n\n        google_api_key = self.api_key\n        model = self.model_name\n        max_output_tokens = self.max_output_tokens\n        temperature = self.temperature\n        top_k = self.top_k\n        top_p = self.top_p\n        n = self.n\n\n        return ChatGoogleGenerativeAI(\n            model=model,\n            max_output_tokens=max_output_tokens or None,\n            temperature=temperature,\n            top_k=top_k or None,\n            top_p=top_p or None,\n            n=n or 1,\n            google_api_key=SecretStr(google_api_key).get_secret_value(),\n        )\n\n    def get_models(self, tool_model_enabled: bool | None = None) -> list[str]:\n        try:\n            import google.generativeai as genai\n\n            genai.configure(api_key=self.api_key)\n            model_ids = [\n                model.name.replace(\"models/\", \"\")\n                for model in genai.list_models()\n                if \"generateContent\" in model.supported_generation_methods\n            ]\n            model_ids.sort(reverse=True)\n        except (ImportError, ValueError) as e:\n            logger.exception(f\"Error getting model names: {e}\")\n            model_ids = GOOGLE_GENERATIVE_AI_MODELS\n        if tool_model_enabled:\n            try:\n                from langchain_google_genai.chat_models import ChatGoogleGenerativeAI\n            except ImportError as e:\n                msg = \"langchain_google_genai is not installed.\"\n                raise ImportError(msg) from e\n            for model in model_ids:\n                model_with_tool = ChatGoogleGenerativeAI(\n                    model=self.model_name,\n                    google_api_key=self.api_key,\n                )\n                if not self.supports_tool_calling(model_with_tool):\n                    model_ids.remove(model)\n        return model_ids\n\n    def update_build_config(self, build_config: dotdict, field_value: Any, field_name: str | None = None):\n        if field_name in (\"base_url\", \"model_name\", \"tool_model_enabled\", \"api_key\") and field_value:\n            try:\n                if len(self.api_key) == 0:\n                    ids = GOOGLE_GENERATIVE_AI_MODELS\n                else:\n                    try:\n                        ids = self.get_models(tool_model_enabled=self.tool_model_enabled)\n                    except (ImportError, ValueError, requests.exceptions.RequestException) as e:\n                        logger.exception(f\"Error getting model names: {e}\")\n                        ids = GOOGLE_GENERATIVE_AI_MODELS\n                build_config[\"model_name\"][\"options\"] = ids\n                build_config[\"model_name\"][\"value\"] = ids[0]\n            except Exception as e:\n                msg = f\"Error getting model names: {e}\"\n                raise ValueError(msg) from e\n        return build_config\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "input_value": {
+                "trace_as_input": true,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "input_value",
+                "value": "",
+                "display_name": "Input",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageInput"
+              },
+              "max_output_tokens": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "max_output_tokens",
+                "value": 8192,
+                "display_name": "Max Output Tokens",
+                "advanced": false,
+                "dynamic": false,
+                "info": "The maximum number of tokens to generate.",
+                "title_case": false,
+                "type": "int",
+                "_input_type": "IntInput"
+              },
+              "model_name": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "options": [
+                  "learnlm-1.5-pro-experimental",
+                  "gemma-3-27b-it",
+                  "gemini-pro-vision",
+                  "gemini-exp-1206",
+                  "gemini-2.0-pro-exp-02-05",
+                  "gemini-2.0-pro-exp",
+                  "gemini-2.0-flash-thinking-exp-1219",
+                  "gemini-2.0-flash-thinking-exp-01-21",
+                  "gemini-2.0-flash-thinking-exp",
+                  "gemini-2.0-flash-lite-preview-02-05",
+                  "gemini-2.0-flash-lite-preview",
+                  "gemini-2.0-flash-lite-001",
+                  "gemini-2.0-flash-lite",
+                  "gemini-2.0-flash-exp-image-generation",
+                  "gemini-2.0-flash-exp",
+                  "gemini-2.0-flash-001",
+                  "gemini-2.0-flash",
+                  "gemini-1.5-pro-latest",
+                  "gemini-1.5-pro-002",
+                  "gemini-1.5-pro-001",
+                  "gemini-1.5-pro",
+                  "gemini-1.5-flash-latest",
+                  "gemini-1.5-flash-8b-latest",
+                  "gemini-1.5-flash-8b-exp-0924",
+                  "gemini-1.5-flash-8b-exp-0827",
+                  "gemini-1.5-flash-8b-001",
+                  "gemini-1.5-flash-8b",
+                  "gemini-1.5-flash-002",
+                  "gemini-1.5-flash-001-tuning",
+                  "gemini-1.5-flash-001",
+                  "gemini-1.5-flash",
+                  "gemini-1.0-pro-vision-latest"
+                ],
+                "options_metadata": [],
+                "combobox": true,
+                "dialog_inputs": {},
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "model_name",
+                "value": "gemini-2.0-flash",
+                "display_name": "Model",
+                "advanced": false,
+                "dynamic": false,
+                "info": "The name of the model to use.",
+                "refresh_button": true,
+                "title_case": false,
+                "type": "str",
+                "_input_type": "DropdownInput"
+              },
+              "n": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "n",
+                "value": "",
+                "display_name": "N",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Number of chat completions to generate for each prompt. Note that the API may not return the full n completions if duplicates are generated.",
+                "title_case": false,
+                "type": "int",
+                "_input_type": "IntInput"
+              },
+              "stream": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "stream",
+                "value": false,
+                "display_name": "Stream",
+                "advanced": false,
+                "dynamic": false,
+                "info": "Stream the response from the model. Streaming works only in Chat.",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "system_message": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "multiline": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "system_message",
+                "value": "",
+                "display_name": "System Message",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "System message to pass to the model.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MultilineInput"
+              },
+              "temperature": {
+                "tool_mode": false,
+                "min_label": "",
+                "max_label": "",
+                "min_label_icon": "",
+                "max_label_icon": "",
+                "slider_buttons": false,
+                "slider_buttons_options": [],
+                "slider_input": false,
+                "range_spec": {
+                  "step_type": "float",
+                  "min": 0,
+                  "max": 2,
+                  "step": 0.01
+                },
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "temperature",
+                "value": 0.61,
+                "display_name": "Temperature",
+                "advanced": false,
+                "dynamic": false,
+                "info": "Controls randomness. Lower values are more deterministic, higher values are more creative.",
+                "title_case": false,
+                "type": "slider",
+                "_input_type": "SliderInput"
+              },
+              "tool_model_enabled": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "tool_model_enabled",
+                "value": false,
+                "display_name": "Tool Model Enabled",
+                "advanced": false,
+                "dynamic": false,
+                "info": "Whether to use the tool model.",
+                "title_case": false,
+                "type": "bool",
+                "_input_type": "BoolInput"
+              },
+              "top_k": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "top_k",
+                "value": "",
+                "display_name": "Top K",
+                "advanced": true,
+                "dynamic": false,
+                "info": "Decode using top-k sampling: consider the set of top_k most probable tokens. Must be positive.",
+                "title_case": false,
+                "type": "int",
+                "_input_type": "IntInput"
+              },
+              "top_p": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "top_p",
+                "value": "",
+                "display_name": "Top P",
+                "advanced": true,
+                "dynamic": false,
+                "info": "The maximum cumulative probability of tokens to consider when sampling.",
+                "title_case": false,
+                "type": "float",
+                "_input_type": "FloatInput"
+              }
+            },
+            "description": "Generate text using Google Generative AI.",
+            "icon": "GoogleGenerativeAI",
+            "base_classes": [
+              "LanguageModel",
+              "Message"
+            ],
+            "display_name": "Google Generative AI",
+            "documentation": "",
+            "minimized": false,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "text_output",
+                "hidden": null,
+                "display_name": "Message",
+                "method": "text_response",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": [],
+                "allows_loop": false,
+                "tool_mode": true
+              },
+              {
+                "types": [
+                  "LanguageModel"
+                ],
+                "selected": "LanguageModel",
+                "name": "model_output",
+                "hidden": null,
+                "display_name": "Language Model",
+                "method": "build_model",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": [
+                  "api_key"
+                ],
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "input_value",
+              "system_message",
+              "stream",
+              "max_output_tokens",
+              "model_name",
+              "api_key",
+              "top_p",
+              "temperature",
+              "n",
+              "top_k",
+              "tool_model_enabled"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": false
+          },
+          "showNode": true,
+          "type": "GoogleGenerativeAIModel",
+          "id": "GoogleGenerativeAIModel-jfzBY"
+        },
+        "selected": false,
+        "measured": {
+          "width": 320,
+          "height": 777
+        },
+        "dragging": false
+      },
+      {
+        "id": "PythonREPLComponent-o0w88",
+        "type": "genericNode",
+        "position": {
+          "x": 1194.5976300727873,
+          "y": -279.66222073861405
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "import importlib\n\nfrom langchain_experimental.utilities import PythonREPL\n\nfrom langflow.custom import Component\nfrom langflow.io import CodeInput, Output, StrInput\nfrom langflow.schema import Data\n\n\nclass PythonREPLComponent(Component):\n    display_name = \"Python REPL\"\n    description = (\n        \"A Python code executor that lets you run Python code with specific imported modules. \"\n        \"Remember to always use print() to see your results. Example: print(df.head())\"\n    )\n    icon = \"Python\"\n\n    inputs = [\n        StrInput(\n            name=\"global_imports\",\n            display_name=\"Global Imports\",\n            info=\"A comma-separated list of modules to import globally, e.g. 'math,numpy,pandas'.\",\n            value=\"math,pandas\",\n            required=True,\n        ),\n        CodeInput(\n            name=\"python_code\",\n            display_name=\"Python Code\",\n            info=\"The Python code to execute. Only modules specified in Global Imports can be used.\",\n            value=\"print('Hello, World!')\",\n            tool_mode=True,\n            required=True,\n        ),\n    ]\n\n    outputs = [\n        Output(\n            display_name=\"Results\",\n            name=\"results\",\n            type_=Data,\n            method=\"run_python_repl\",\n        ),\n    ]\n\n    def get_globals(self, global_imports: str | list[str]) -> dict:\n        \"\"\"Create a globals dictionary with only the specified allowed imports.\"\"\"\n        global_dict = {}\n\n        try:\n            if isinstance(global_imports, str):\n                modules = [module.strip() for module in global_imports.split(\",\")]\n            elif isinstance(global_imports, list):\n                modules = global_imports\n            else:\n                msg = \"global_imports must be either a string or a list\"\n                raise TypeError(msg)\n\n            for module in modules:\n                try:\n                    imported_module = importlib.import_module(module)\n                    global_dict[imported_module.__name__] = imported_module\n                except ImportError as e:\n                    msg = f\"Could not import module {module}: {e!s}\"\n                    raise ImportError(msg) from e\n\n        except Exception as e:\n            self.log(f\"Error in global imports: {e!s}\")\n            raise\n        else:\n            self.log(f\"Successfully imported modules: {list(global_dict.keys())}\")\n            return global_dict\n\n    def run_python_repl(self) -> Data:\n        try:\n            globals_ = self.get_globals(self.global_imports)\n            python_repl = PythonREPL(_globals=globals_)\n            result = python_repl.run(self.python_code)\n            result = result.strip() if result else \"\"\n\n            self.log(\"Code execution completed successfully\")\n            return Data(data={\"result\": result})\n\n        except ImportError as e:\n            error_message = f\"Import Error: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n        except SyntaxError as e:\n            error_message = f\"Syntax Error: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n        except (NameError, TypeError, ValueError) as e:\n            error_message = f\"Error during execution: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n    def build(self):\n        return self.run_python_repl\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "global_imports": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "global_imports",
+                "value": "math,numpy,pandas,plotly,PyLTSpice",
+                "display_name": "Global Imports",
+                "advanced": false,
+                "dynamic": false,
+                "info": "A comma-separated list of modules to import globally, e.g. 'math,numpy,pandas'.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "StrInput"
+              },
+              "python_code": {
+                "tool_mode": true,
+                "trace_as_input": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "python_code",
+                "value": "import numpy as np\r\nimport pandas as pd\r\nimport plotly.graph_objects as go\r\nimport plotly.express as px\r\nfrom PyLTSpice import SimRunner, SpiceEditor, RawRead, LTSpice\r\nfrom io import BytesIO\r\nimport base64\r\n\r\ndef analyze_frequency(circuit_name, frequency_range, parameters=None):\r\n    \"\"\"Частотный анализ (AC-анализ) схемы.\"\"\"\r\n    runner = SimRunner(output_folder='./simulations', simulator=LTSpice)\r\n    netlist = SpiceEditor(f\"{circuit_name}.asc\")\r\n    if parameters:\r\n        for param, value in parameters.items():\r\n            netlist.set_parameter(param, value)\r\n    start_freq, stop_freq, points = frequency_range\r\n    netlist.add_instructions(f\".ac dec {points} {start_freq} {stop_freq}\")\r\n    \r\n    runner.run(netlist)\r\n    \r\n    results = {}\r\n    for raw_file, log_file in runner:\r\n        raw_data = RawRead(raw_file)\r\n        \r\n        frequencies = raw_data.get_trace('frequency').get_wave()\r\n        gain_db = 20 * np.log10(np.abs(raw_data.get_trace('V(out)').get_wave()))\r\n        phase = np.angle(raw_data.get_trace('V(out)').get_wave(), deg=True)\r\n        \r\n        try:\r\n            max_gain = np.max(gain_db)\r\n            bandwidth_indices = np.where(gain_db >= (max_gain - 3))\r\n            if len(bandwidth_indices[0]) > 0:\r\n                min_freq = frequencies[bandwidth_indices[0][0]]\r\n                max_freq = frequencies[bandwidth_indices[0][-1]]\r\n                bandwidth = max_freq - min_freq\r\n            else:\r\n                bandwidth = None\r\n        except:\r\n            bandwidth = None\r\n            \r\n        fig = go.Figure()\r\n        \r\n        fig.add_trace(go.Scatter(\r\n            x=frequencies,\r\n            y=gain_db,\r\n            name='АЧХ',\r\n            line=dict(color='blue', width=2)\r\n        ))\r\n        \r\n        fig.update_layout(\r\n            title='Амплитудно-частотная характеристика',\r\n            xaxis_title='Частота (Гц)',\r\n            yaxis_title='Усиление (дБ)',\r\n            xaxis_type='log',\r\n            template='plotly_white',\r\n            height=500,\r\n            width=800\r\n        )\r\n        \r\n        fig2 = go.Figure()\r\n        fig2.add_trace(go.Scatter(\r\n            x=frequencies,\r\n            y=phase,\r\n            name='ФЧХ',\r\n            line=dict(color='red', width=2)\r\n        ))\r\n        \r\n        fig2.update_layout(\r\n            title='Фазо-частотная характеристика',\r\n            xaxis_title='Частота (Гц)',\r\n            yaxis_title='Фаза (градусы)',\r\n            xaxis_type='log',\r\n            template='plotly_white',\r\n            height=500,\r\n            width=800\r\n        )\r\n        \r\n        # Конвертация графиков в JSON для передачи\r\n        plot_json = json.dumps({\r\n            'ach': fig.to_json(),\r\n            'fch': fig2.to_json()\r\n        })\r\n        \r\n        results = {\r\n            'frequencies': frequencies.tolist(),\r\n            'gain_db': gain_db.tolist(),\r\n            'phase': phase.tolist(),\r\n            'bandwidth': bandwidth,\r\n            'plot_json': plot_json,\r\n            'summary': {\r\n                'max_gain': float(np.max(gain_db)),\r\n                'min_gain': float(np.min(gain_db)),\r\n                'bandwidth': float(bandwidth) if bandwidth else None,\r\n                'unity_gain_frequency': find_unity_gain_frequency(frequencies, gain_db)\r\n            }\r\n        }\r\n        \r\n    return results\r\n\r\ndef find_unity_gain_frequency(frequencies, gain_db):\r\n    \"\"\"Находит частоту единичного усиления\"\"\"\r\n    try:\r\n        for i in range(len(gain_db)-1):\r\n            if (gain_db[i] >= 0 and gain_db[i+1] < 0) or (gain_db[i] <= 0 and gain_db[i+1] > 0):\r\n                x1, y1 = frequencies[i], gain_db[i]\r\n                x2, y2 = frequencies[i+1], gain_db[i+1]\r\n                unity_freq = x1 + (0 - y1) * (x2 - x1) / (y2 - y1)\r\n                return float(unity_freq)\r\n        return None\r\n    except:\r\n        return None\r\n\r\ndef analyze_monte_carlo(circuit_name, param_variations, num_runs, analysis_type=\"tran\"):\r\n    \"\"\"Анализ Монте-Карло для оценки влияния разброса параметров.\"\"\"\r\n    results = []\r\n    \r\n    for run in range(num_runs):\r\n        run_params = {}\r\n        for param, variation in param_variations.items():\r\n            base_value = variation['value']\r\n            deviation = variation['deviation']\r\n            if variation['distribution'] == 'normal':\r\n                value = np.random.normal(base_value, base_value * deviation / 100)\r\n            elif variation['distribution'] == 'uniform':\r\n                min_val = base_value * (1 - deviation / 100)\r\n                max_val = base_value * (1 + deviation / 100)\r\n                value = np.random.uniform(min_val, max_val)\r\n            run_params[param] = value\r\n        \r\n        runner = SimRunner(output_folder='./simulations', simulator=LTSpice)\r\n        netlist = SpiceEditor(f\"{circuit_name}.asc\")\r\n        \r\n        for param, value in run_params.items():\r\n            netlist.set_component_value(param, f\"{value}\")\r\n        \r\n        if analysis_type == \"tran\":\r\n            netlist.add_instructions(\".tran 0 10m 0 0.01m\")\r\n        elif analysis_type == \"ac\":\r\n            netlist.add_instructions(\".ac dec 20 1 100k\")\r\n        \r\n        runner.run(netlist)\r\n        \r\n        for raw_file, log_file in runner:\r\n            raw_data = RawRead(raw_file)\r\n            \r\n            if analysis_type == \"tran\":\r\n                time_data = raw_data.get_trace('time').get_wave()\r\n                output_data = raw_data.get_trace('V(out)').get_wave()\r\n                \r\n                rise_time, fall_time, overshoot = calculate_transient_params(time_data, output_data)\r\n                \r\n                run_result = {\r\n                    'run': run + 1,\r\n                    'parameters': run_params,\r\n                    'rise_time': rise_time,\r\n                    'fall_time': fall_time,\r\n                    'overshoot': overshoot\r\n                }\r\n            \r\n            elif analysis_type == \"ac\":\r\n                frequencies = raw_data.get_trace('frequency').get_wave()\r\n                gain = 20 * np.log10(np.abs(raw_data.get_trace('V(out)').get_wave()))\r\n                max_gain = np.max(gain)\r\n                unity_gain_freq = find_unity_gain_frequency(frequencies, gain)\r\n                \r\n                run_result = {\r\n                    'run': run + 1,\r\n                    'parameters': run_params,\r\n                    'max_gain': float(max_gain),\r\n                    'unity_gain_frequency': unity_gain_freq\r\n                }\r\n            \r\n            results.append(run_result)\r\n    \r\n    stats = calculate_monte_carlo_stats(results, analysis_type)\r\n    \r\n    return {\r\n        'runs': results,\r\n        'statistics': stats\r\n    }\r\n\r\ndef calculate_monte_carlo_stats(results, analysis_type):\r\n    \"\"\"Расчет статистики для результатов Монте-Карло.\"\"\"\r\n    stats = {}\r\n    \r\n    if analysis_type == \"tran\":\r\n        rise_times = [r['rise_time'] for r in results if r['rise_time'] is not None]\r\n        fall_times = [r['fall_time'] for r in results if r['fall_time'] is not None]\r\n        overshoots = [r['overshoot'] for r in results if r['overshoot'] is not None]\r\n        \r\n        stats = {\r\n            'rise_time': {\r\n                'mean': np.mean(rise_times) if rise_times else None,\r\n                'std': np.std(rise_times) if rise_times else None,\r\n                'min': np.min(rise_times) if rise_times else None,\r\n                'max': np.max(rise_times) if rise_times else None\r\n            },\r\n            'fall_time': {\r\n                'mean': np.mean(fall_times) if fall_times else None,\r\n                'std': np.std(fall_times) if fall_times else None,\r\n                'min': np.min(fall_times) if fall_times else None,\r\n                'max': np.max(fall_times) if fall_times else None\r\n            },\r\n            'overshoot': {\r\n                'mean': np.mean(overshoots) if overshoots else None,\r\n                'std': np.std(overshoots) if overshoots else None,\r\n                'min': np.min(overshoots) if overshoots else None,\r\n                'max': np.max(overshoots) if overshoots else None\r\n            }\r\n        }\r\n    \r\n    elif analysis_type == \"ac\":\r\n        max_gains = [r['max_gain'] for r in results if r['max_gain'] is not None]\r\n        unity_freqs = [r['unity_gain_frequency'] for r in results if r['unity_gain_frequency'] is not None]\r\n        \r\n        stats = {\r\n            'max_gain': {\r\n                'mean': np.mean(max_gains) if max_gains else None,\r\n                'std': np.std(max_gains) if max_gains else None,\r\n                'min': np.min(max_gains) if max_gains else None,\r\n                'max': np.max(max_gains) if max_gains else None\r\n            },\r\n            'unity_gain_frequency': {\r\n                'mean': np.mean(unity_freqs) if unity_freqs else None,\r\n                'std': np.std(unity_freqs) if unity_freqs else None,\r\n                'min': np.min(unity_freqs) if unity_freqs else None,\r\n                'max': np.max(unity_freqs) if unity_freqs else None\r\n            }\r\n        }\r\n    \r\n    return stats\r\n\r\ndef calculate_transient_params(time_data, output_data):\r\n    \"\"\"Расчет параметров переходного процесса.\"\"\"\r\n    try:\r\n        steady_state = output_data[-1]\r\n        initial_state = output_data[0]\r\n        threshold_10 = initial_state + 0.1 * (steady_state - initial_state)\r\n        threshold_90 = initial_state + 0.9 * (steady_state - initial_state)\r\n        \r\n        t_10_idx = np.where(output_data >= threshold_10)[0][0]\r\n        t_90_idx = np.where(output_data >= threshold_90)[0][0]\r\n        \r\n        rise_time = time_data[t_90_idx] - time_data[t_10_idx]\r\n        fall_time = None\r\n        max_value = np.max(output_data)\r\n        overshoot_percent = ((max_value - steady_state) / steady_state) * 100 if steady_state != 0 else 0\r\n        \r\n        return rise_time, fall_time, overshoot_percent\r\n    except:\r\n        return None, None, None\r\n        \r\ndef analyze_transient(circuit_name, load_list, input_voltage_list):\r\n    \"\"\"Анализ переходных процессов при различных нагрузках и входных напряжениях.\"\"\"\r\n    results = {}\r\n    \r\n    for load in load_list:\r\n        for voltage in input_voltage_list:\r\n            runner = SimRunner(output_folder='./simulations', simulator=LTSpice)\r\n            netlist = SpiceEditor(f\"{circuit_name}.asc\")\r\n            \r\n            netlist.set_component_value('Rload', load)\r\n            netlist.set_component_value('V1', voltage)\r\n            netlist.add_instructions(\".tran 0 10m 0 0.01m\")\r\n            \r\n            runner.run(netlist)\r\n            \r\n            for raw_file, log_file in runner:\r\n                raw_data = RawRead(raw_file)\r\n                time_data = raw_data.get_trace('time').get_wave()\r\n                output_data = raw_data.get_trace('V(out)').get_wave()\r\n                \r\n                fig = go.Figure()\r\n                fig.add_trace(go.Scatter(\r\n                    x=time_data,\r\n                    y=output_data,\r\n                    name='Выходное напряжение',\r\n                    line=dict(color='green', width=2)\r\n                ))\r\n                \r\n                fig.update_layout(\r\n                    title=f'Переходный процесс (нагрузка={load}, вход={voltage})',\r\n                    xaxis_title='Время (с)',\r\n                    yaxis_title='Напряжение (В)',\r\n                    template='plotly_white',\r\n                    height=500,\r\n                    width=800\r\n                )\r\n                \r\n                plot_json = json.dumps({\r\n                    'transient': fig.to_json()\r\n                })\r\n                \r\n                transient_data = extract_transient_data(time_data, output_data)\r\n                transient_data['plot_json'] = plot_json\r\n                results[f\"load={load},voltage={voltage}\"] = transient_data\r\n    \r\n    return results\r\n\r\n\r\ndef generate_report(circuit_name, analyses_results):\r\n    \"\"\"Создание комплексного отчета на основе результатов анализа.\"\"\"\r\n    report = {\r\n        'circuit_name': circuit_name,\r\n        'timestamp': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S'),\r\n        'analyses': analyses_results,\r\n        'summary': {}\r\n    }\r\n    # Формирование сводки\r\n    if 'stability' in analyses_results:\r\n        stable_count = sum(1 for result in analyses_results['stability'] if result['stability'] == 'Стабильна')\r\n        total_count = len(analyses_results['stability'])\r\n        report['summary']['stability'] = {\r\n            'stable_count': stable_count,\r\n            'total_count': total_count,\r\n            'stable_percentage': (stable_count / total_count * 100) if total_count > 0 else 0\r\n        }\r\n    \r\n    if 'frequency' in analyses_results:\r\n        report['summary']['frequency'] = {\r\n            'bandwidth': analyses_results['frequency'].get('bandwidth'),\r\n            'max_gain': analyses_results['frequency'].get('summary', {}).get('max_gain')\r\n        }\r\n    \r\n    if 'monte_carlo' in analyses_results:\r\n        if analyses_results['monte_carlo'].get('statistics'):\r\n            report['summary']['monte_carlo'] = analyses_results['monte_carlo']['statistics']\r\n    \r\n    summary_data = []\r\n    \r\n    if 'stability' in analyses_results:\r\n        for result in analyses_results['stability']:\r\n            summary_data.append({\r\n                'Анализ': 'Стабильность',\r\n                'Параметр': f\"Запас по фазе: {result.get('phase_margin')}°, Запас по усилению: {result.get('gain_margin')} дБ\",\r\n                'Результат': result.get('stability')\r\n            })\r\n    \r\n    if 'frequency' in analyses_results:\r\n        freq_data = analyses_results['frequency']\r\n        if 'summary' in freq_data:\r\n            for key, value in freq_data['summary'].items():\r\n                if key != 'plot':\r\n                    summary_data.append({\r\n                        'Анализ': 'Частотный',\r\n                        'Параметр': key.replace('_', ' ').title(),\r\n                        'Результат': f\"{value:.2f}\" if isinstance(value, (int, float)) and value is not None else str(value)\r\n                    })\r\n    \r\n    if 'monte_carlo' in analyses_results:\r\n        mc_stats = analyses_results['monte_carlo'].get('statistics', {})\r\n        for param_type, stats in mc_stats.items():\r\n            if stats.get('mean') is not None:\r\n                summary_data.append({\r\n                    'Анализ': 'Монте-Карло',\r\n                    'Параметр': param_type.replace('_', ' ').title(),\r\n                    'Результат': f\"Среднее: {stats['mean']:.2e}, Разброс: {stats['std']:.2e}\"\r\n                })\r\n    \r\n    df = pd.DataFrame(summary_data)\r\n    if not df.empty:\r\n        report['summary_table'] = df.to_markdown()\r\n    \r\n    return report\r\n",
+                "display_name": "Python Code",
+                "advanced": false,
+                "dynamic": false,
+                "info": "The Python code to execute. Only modules specified in Global Imports can be used.",
+                "title_case": false,
+                "type": "code",
+                "_input_type": "CodeInput"
+              },
+              "tools_metadata": {
+                "tool_mode": false,
+                "is_list": true,
+                "list_add_label": "Add More",
+                "table_schema": {
+                  "columns": [
+                    {
+                      "name": "name",
+                      "display_name": "Tool Name",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "Specify the name of the tool.",
+                      "default": "None",
+                      "disable_edit": false,
+                      "edit_mode": "inline",
+                      "hidden": false
+                    },
+                    {
+                      "name": "description",
+                      "display_name": "Tool Description",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "Describe the purpose of the tool.",
+                      "default": "None",
+                      "disable_edit": false,
+                      "edit_mode": "popover",
+                      "hidden": false
+                    },
+                    {
+                      "name": "tags",
+                      "display_name": "Tool Identifiers",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "The default identifiers for the tools and cannot be changed.",
+                      "default": "None",
+                      "disable_edit": true,
+                      "edit_mode": "inline",
+                      "hidden": true
+                    }
+                  ]
+                },
+                "trigger_text": "",
+                "trigger_icon": "Hammer",
+                "table_icon": "Hammer",
+                "table_options": {
+                  "block_add": true,
+                  "block_delete": true,
+                  "block_edit": true,
+                  "block_sort": true,
+                  "block_filter": true,
+                  "block_hide": true,
+                  "block_select": true,
+                  "hide_options": true,
+                  "field_parsers": {
+                    "name": [
+                      "snake_case",
+                      "no_blank"
+                    ],
+                    "commands": "commands"
+                  },
+                  "description": "Modify tool names and descriptions to help agents understand when to use each tool."
+                },
+                "trace_as_metadata": true,
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "tools_metadata",
+                "value": [
+                  {
+                    "name": "PythonREPLComponent-run_python_repl",
+                    "description": "run_python_repl(global_imports: str, python_code: code) - A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
+                    "tags": [
+                      "PythonREPLComponent-run_python_repl"
+                    ]
+                  }
+                ],
+                "display_name": "Edit tools",
+                "advanced": false,
+                "dynamic": false,
+                "info": "",
+                "real_time_refresh": true,
+                "title_case": false,
+                "type": "table",
+                "_input_type": "TableInput"
+              }
+            },
+            "description": "A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
+            "icon": "Python",
+            "base_classes": [
+              "Data"
+            ],
+            "display_name": "Python REPL",
+            "documentation": "",
+            "minimized": false,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Tool"
+                ],
+                "selected": "Tool",
+                "name": "component_as_tool",
+                "hidden": null,
+                "display_name": "Toolset",
+                "method": "to_toolkit",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": null,
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "global_imports",
+              "python_code"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": true,
+            "category": "tools",
+            "key": "PythonREPLComponent",
+            "score": 0.003461035063578755
+          },
+          "showNode": true,
+          "type": "PythonREPLComponent",
+          "id": "PythonREPLComponent-o0w88"
+        },
+        "selected": true,
+        "measured": {
+          "width": 320,
+          "height": 461
+        },
+        "dragging": false
+      },
+      {
+        "id": "Prompt-c6a6y",
+        "type": "genericNode",
+        "position": {
+          "x": 1187.5356848280703,
+          "y": 208.59894264873
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "from langflow.base.prompts.api_utils import process_prompt_template\nfrom langflow.custom import Component\nfrom langflow.inputs.inputs import DefaultPromptField\nfrom langflow.io import MessageTextInput, Output, PromptInput\nfrom langflow.schema.message import Message\nfrom langflow.template.utils import update_template_values\n\n\nclass PromptComponent(Component):\n    display_name: str = \"Prompt\"\n    description: str = \"Create a prompt template with dynamic variables.\"\n    icon = \"prompts\"\n    trace_type = \"prompt\"\n    name = \"Prompt\"\n\n    inputs = [\n        PromptInput(name=\"template\", display_name=\"Template\"),\n        MessageTextInput(\n            name=\"tool_placeholder\",\n            display_name=\"Tool Placeholder\",\n            tool_mode=True,\n            advanced=True,\n            info=\"A placeholder input for tool mode.\",\n        ),\n    ]\n\n    outputs = [\n        Output(display_name=\"Prompt Message\", name=\"prompt\", method=\"build_prompt\"),\n    ]\n\n    async def build_prompt(self) -> Message:\n        prompt = Message.from_template(**self._attributes)\n        self.status = prompt.text\n        return prompt\n\n    def _update_template(self, frontend_node: dict):\n        prompt_template = frontend_node[\"template\"][\"template\"][\"value\"]\n        custom_fields = frontend_node[\"custom_fields\"]\n        frontend_node_template = frontend_node[\"template\"]\n        _ = process_prompt_template(\n            template=prompt_template,\n            name=\"template\",\n            custom_fields=custom_fields,\n            frontend_node_template=frontend_node_template,\n        )\n        return frontend_node\n\n    async def update_frontend_node(self, new_frontend_node: dict, current_frontend_node: dict):\n        \"\"\"This function is called after the code validation is done.\"\"\"\n        frontend_node = await super().update_frontend_node(new_frontend_node, current_frontend_node)\n        template = frontend_node[\"template\"][\"template\"][\"value\"]\n        # Kept it duplicated for backwards compatibility\n        _ = process_prompt_template(\n            template=template,\n            name=\"template\",\n            custom_fields=frontend_node[\"custom_fields\"],\n            frontend_node_template=frontend_node[\"template\"],\n        )\n        # Now that template is updated, we need to grab any values that were set in the current_frontend_node\n        # and update the frontend_node with those values\n        update_template_values(new_template=frontend_node, previous_template=current_frontend_node[\"template\"])\n        return frontend_node\n\n    def _get_fallback_input(self, **kwargs):\n        return DefaultPromptField(**kwargs)\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "template": {
+                "tool_mode": false,
+                "trace_as_input": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "template",
+                "value": "Ты - AI-ассистент, специализирующийся на электронном проектировании и анализе схем.\n\nЗадача пользователя: {input}\n\nУ тебя есть доступ к специализированной базе знаний с технической документацией по электронным схемам через систему RAG (Retrieval-Augmented Generation).\n\nТы можешь выполнять следующие типы анализа:\n1. Анализ стабильности схем (запас по фазе, запас по усилению)\n2. Анализ шумовых характеристик при разных условиях\n3. Анализ переходных процессов\n4. Частотный анализ (АЧХ и ФЧХ)\n5. Анализ Монте-Карло для оценки влияния разброса параметров компонентов\n6. Комплексный анализ с генерацией отчета\n7. Поиск дополнительной информации в базе знаний\n\nИспользуй соответствующие функции:\n- analyze_stability() для анализа стабильности\n- analyze_noise() для шумового анализа\n- analyze_transient() для анализа переходных процессов\n- analyze_frequency() для частотного анализа\n- analyze_monte_carlo() для статистического анализа\n- generate_report() для комплексного отчета\n- rag_enhanced_analysis() для поиска информации в базе знаний\n- combine_analysis_with_rag() для объединения результатов анализа с данными из базы знаний\n\nВсегда объясняй результаты анализа понятным языком и дополняй их релевантной информацией из базы знаний.\n",
+                "display_name": "Template",
+                "advanced": false,
+                "dynamic": false,
+                "info": "",
+                "title_case": false,
+                "type": "prompt",
+                "_input_type": "PromptInput"
+              },
+              "tool_placeholder": {
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "tool_placeholder",
+                "value": "",
+                "display_name": "Tool Placeholder",
+                "advanced": true,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "A placeholder input for tool mode.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "MessageTextInput"
+              },
+              "input": {
+                "field_type": "str",
+                "required": false,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "",
+                "fileTypes": [],
+                "file_path": "",
+                "name": "input",
+                "display_name": "input",
+                "advanced": false,
+                "input_types": [
+                  "Message"
+                ],
+                "dynamic": false,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false,
+                "type": "str"
+              }
+            },
+            "description": "Create a prompt template with dynamic variables.",
+            "icon": "prompts",
+            "is_input": null,
+            "is_output": null,
+            "is_composition": null,
+            "base_classes": [
+              "Message"
+            ],
+            "name": "",
+            "display_name": "Prompt",
+            "documentation": "",
+            "minimized": false,
+            "custom_fields": {
+              "template": [
+                "input"
+              ]
+            },
+            "output_types": [],
+            "full_path": null,
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Message"
+                ],
+                "selected": "Message",
+                "name": "prompt",
+                "hidden": null,
+                "display_name": "Prompt Message",
+                "method": "build_prompt",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": null,
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "template",
+              "tool_placeholder"
+            ],
+            "beta": false,
+            "legacy": false,
+            "error": null,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": false
+          },
+          "showNode": true,
+          "type": "Prompt",
+          "id": "Prompt-c6a6y"
+        },
+        "selected": false,
+        "measured": {
+          "width": 320,
+          "height": 337
+        },
+        "dragging": false
+      },
+      {
+        "id": "PythonREPLComponent-6DMo2",
+        "type": "genericNode",
+        "position": {
+          "x": 1191.6781958004765,
+          "y": -769.6843422303012
+        },
+        "data": {
+          "node": {
+            "template": {
+              "_type": "Component",
+              "code": {
+                "type": "code",
+                "required": true,
+                "placeholder": "",
+                "list": false,
+                "show": true,
+                "multiline": true,
+                "value": "import importlib\n\nfrom langchain_experimental.utilities import PythonREPL\n\nfrom langflow.custom import Component\nfrom langflow.io import CodeInput, Output, StrInput\nfrom langflow.schema import Data\n\n\nclass PythonREPLComponent(Component):\n    display_name = \"Python REPL\"\n    description = (\n        \"A Python code executor that lets you run Python code with specific imported modules. \"\n        \"Remember to always use print() to see your results. Example: print(df.head())\"\n    )\n    icon = \"Python\"\n\n    inputs = [\n        StrInput(\n            name=\"global_imports\",\n            display_name=\"Global Imports\",\n            info=\"A comma-separated list of modules to import globally, e.g. 'math,numpy,pandas'.\",\n            value=\"math,pandas\",\n            required=True,\n        ),\n        CodeInput(\n            name=\"python_code\",\n            display_name=\"Python Code\",\n            info=\"The Python code to execute. Only modules specified in Global Imports can be used.\",\n            value=\"print('Hello, World!')\",\n            tool_mode=True,\n            required=True,\n        ),\n    ]\n\n    outputs = [\n        Output(\n            display_name=\"Results\",\n            name=\"results\",\n            type_=Data,\n            method=\"run_python_repl\",\n        ),\n    ]\n\n    def get_globals(self, global_imports: str | list[str]) -> dict:\n        \"\"\"Create a globals dictionary with only the specified allowed imports.\"\"\"\n        global_dict = {}\n\n        try:\n            if isinstance(global_imports, str):\n                modules = [module.strip() for module in global_imports.split(\",\")]\n            elif isinstance(global_imports, list):\n                modules = global_imports\n            else:\n                msg = \"global_imports must be either a string or a list\"\n                raise TypeError(msg)\n\n            for module in modules:\n                try:\n                    imported_module = importlib.import_module(module)\n                    global_dict[imported_module.__name__] = imported_module\n                except ImportError as e:\n                    msg = f\"Could not import module {module}: {e!s}\"\n                    raise ImportError(msg) from e\n\n        except Exception as e:\n            self.log(f\"Error in global imports: {e!s}\")\n            raise\n        else:\n            self.log(f\"Successfully imported modules: {list(global_dict.keys())}\")\n            return global_dict\n\n    def run_python_repl(self) -> Data:\n        try:\n            globals_ = self.get_globals(self.global_imports)\n            python_repl = PythonREPL(_globals=globals_)\n            result = python_repl.run(self.python_code)\n            result = result.strip() if result else \"\"\n\n            self.log(\"Code execution completed successfully\")\n            return Data(data={\"result\": result})\n\n        except ImportError as e:\n            error_message = f\"Import Error: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n        except SyntaxError as e:\n            error_message = f\"Syntax Error: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n        except (NameError, TypeError, ValueError) as e:\n            error_message = f\"Error during execution: {e!s}\"\n            self.log(error_message)\n            return Data(data={\"error\": error_message})\n\n    def build(self):\n        return self.run_python_repl\n",
+                "fileTypes": [],
+                "file_path": "",
+                "password": false,
+                "name": "code",
+                "advanced": true,
+                "dynamic": true,
+                "info": "",
+                "load_from_db": false,
+                "title_case": false
+              },
+              "global_imports": {
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "load_from_db": false,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "global_imports",
+                "value": "math,pandas,numpy,langchain,langchain_community",
+                "display_name": "Global Imports",
+                "advanced": false,
+                "dynamic": false,
+                "info": "A comma-separated list of modules to import globally, e.g. 'math,numpy,pandas'.",
+                "title_case": false,
+                "type": "str",
+                "_input_type": "StrInput"
+              },
+              "python_code": {
+                "tool_mode": true,
+                "trace_as_input": true,
+                "list": false,
+                "list_add_label": "Add More",
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "name": "python_code",
+                "value": "import os\r\nimport re\r\nimport json\r\nimport pandas as pd\r\nimport numpy as np\r\nfrom langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader\r\nfrom langchain_community.embeddings import HuggingFaceEmbeddings\r\nfrom langchain_community.vectorstores import FAISS\r\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\r\nfrom langchain.schema.document import Document\r\n\r\ndef build_knowledge_base(dir_path, output_path=\"circuit_knowledge_base\"):\r\n    \"\"\"\r\n    Создает векторную базу знаний из технической документации по электронным схемам.\r\n    \r\n    Args:\r\n        dir_path: Путь к директории с документами\r\n        output_path: Путь для сохранения векторной базы\r\n    \r\n    Returns:\r\n        Статус операции и статистику обработанных документов\r\n    \"\"\"\r\n    documents = []\r\n    stats = {\"pdf\": 0, \"txt\": 0, \"csv\": 0, \"skipped\": 0}\r\n    if not os.path.exists(dir_path):\r\n        return {\"status\": \"error\", \"message\": f\"Директория {dir_path} не существует\"}\r\n    for root, _, files in os.walk(dir_path):\r\n        for file in files:\r\n            file_path = os.path.join(root, file)\r\n            try:\r\n                if file.lower().endswith(\".pdf\"):\r\n                    loader = PyPDFLoader(file_path)\r\n                    documents.extend(loader.load())\r\n                    stats[\"pdf\"] += 1\r\n                elif file.lower().endswith(\".txt\"):\r\n                    loader = TextLoader(file_path)\r\n                    documents.extend(loader.load())\r\n                    stats[\"txt\"] += 1\r\n                elif file.lower().endswith(\".csv\"):\r\n                    loader = CSVLoader(file_path)\r\n                    documents.extend(loader.load())\r\n                    stats[\"csv\"] += 1\r\n            except Exception as e:\r\n                stats[\"skipped\"] += 1\r\n                print(f\"Ошибка при обработке файла {file_path}: {str(e)}\")\r\n    \r\n    if not documents:\r\n        return {\"status\": \"error\", \"message\": \"Не найдено документов для обработки\"}\r\n    text_splitter = RecursiveCharacterTextSplitter(\r\n        chunk_size=1000,\r\n        chunk_overlap=200,\r\n        length_function=len,\r\n    )\r\n    chunks = text_splitter.split_documents(documents)\r\n    try:\r\n        embeddings = HuggingFaceEmbeddings(model_name=\"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\")\r\n        db = FAISS.from_documents(chunks, embeddings)\r\n        db.save_local(output_path)\r\n        return {\r\n            \"status\": \"success\", \r\n            \"message\": f\"База знаний создана и сохранена в {output_path}\", \r\n            \"stats\": {\r\n                \"processed_files\": stats,\r\n                \"total_chunks\": len(chunks),\r\n                \"total_documents\": len(documents)\r\n            }\r\n        }\r\n    except Exception as e:\r\n        return {\"status\": \"error\", \"message\": f\"Ошибка при создании базы знаний: {str(e)}\"}\r\n\r\ndef search_knowledge_base(query, kb_path=\"circuit_knowledge_base\", top_k=5):\r\n    \"\"\"\r\n    Ищет информацию в векторной базе знаний.\r\n    \r\n    Args:\r\n        query: Поисковый запрос\r\n        kb_path: Путь к векторной базе знаний\r\n        top_k: Количество результатов для возврата\r\n    \r\n    Returns:\r\n        Список релевантных документов\r\n    \"\"\"\r\n    try:\r\n        if not os.path.exists(kb_path):\r\n            return {\"status\": \"error\", \"message\": f\"База знаний в {kb_path} не найдена\"}\r\n        \r\n        embeddings = HuggingFaceEmbeddings(model_name=\"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\")\r\n        db = FAISS.load_local(kb_path, embeddings)\r\n        docs = db.similarity_search(query, k=top_k)\r\n        results = []\r\n        for i, doc in enumerate(docs):\r\n            result = {\r\n                \"content\": doc.page_content,\r\n                \"source\": doc.metadata.get(\"source\", \"Unknown\"),\r\n                \"page\": doc.metadata.get(\"page\", None)\r\n            }\r\n            results.append(result)\r\n        \r\n        return {\r\n            \"status\": \"success\",\r\n            \"results\": results\r\n        }\r\n    except Exception as e:\r\n        return {\"status\": \"error\", \"message\": f\"Ошибка при поиске: {str(e)}\"}\r\n\r\ndef add_document_to_kb(document_path, kb_path=\"circuit_knowledge_base\"):\r\n    \"\"\"\r\n    Добавляет новый документ в существующую базу знаний.\r\n    \r\n    Args:\r\n        document_path: Путь к документу для добавления\r\n        kb_path: Путь к векторной базе знаний\r\n    \r\n    Returns:\r\n        Статус операции\r\n    \"\"\"\r\n    try:\r\n        if not os.path.exists(kb_path):\r\n            return {\"status\": \"error\", \"message\": f\"База знаний в {kb_path} не найдена\"}\r\n        documents = []\r\n        if document_path.lower().endswith(\".pdf\"):\r\n            loader = PyPDFLoader(document_path)\r\n            documents = loader.load()\r\n        elif document_path.lower().endswith(\".txt\"):\r\n            loader = TextLoader(document_path)\r\n            documents = loader.load()\r\n        elif document_path.lower().endswith(\".csv\"):\r\n            loader = CSVLoader(document_path)\r\n            documents = loader.load()\r\n        else:\r\n            return {\"status\": \"error\", \"message\": \"Неподдерживаемый формат файла\"}\r\n        \r\n        if not documents:\r\n            return {\"status\": \"error\", \"message\": \"Не удалось загрузить документ\"}\r\n        text_splitter = RecursiveCharacterTextSplitter(\r\n            chunk_size=1000,\r\n            chunk_overlap=200,\r\n            length_function=len,\r\n        )\r\n        chunks = text_splitter.split_documents(documents)\r\n        embeddings = HuggingFaceEmbeddings(model_name=\"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\")\r\n        db = FAISS.load_local(kb_path, embeddings)\r\n        db.add_documents(chunks)\r\n        db.save_local(kb_path)\r\n        \r\n        return {\r\n            \"status\": \"success\", \r\n            \"message\": f\"Документ {document_path} добавлен в базу знаний\",\r\n            \"chunks_added\": len(chunks)\r\n        }\r\n    except Exception as e:\r\n        return {\"status\": \"error\", \"message\": f\"Ошибка при добавлении документа: {str(e)}\"}\r\n\r\ndef create_sample_circuit_knowledge():\r\n    \"\"\"\r\n    Создает пример базы знаний с основной информацией об электронных схемах.\r\n    \r\n    Returns:\r\n        Статус операции\r\n    \"\"\"\r\n    try:\r\n        os.makedirs(\"temp_docs\", exist_ok=True)\r\n        stability_info = \"\"\"\r\n        # Анализ стабильности электронных схем\r\n        \r\n        Стабильность электронной схемы - ключевой параметр, определяющий надежность работы устройства.\r\n        \r\n        ## Основные критерии стабильности\r\n        \r\n        1. **Запас по фазе** - должен быть не менее 45° для хорошей стабильности, предпочтительно 60° и выше.\r\n           - Менее 45°: недостаточная стабильность\r\n           - 45°-60°: приемлемая стабильность\r\n           - Более 60°: хорошая стабильность\r\n        \r\n        2. **Запас по усилению** - рекомендуется не менее 10 дБ.\r\n           - Менее 6 дБ: низкий запас\r\n           - 6-10 дБ: минимально допустимый запас\r\n           - Более 10 дБ: хороший запас\r\n        \r\n        ## Типичные проблемы со стабильностью\r\n        \r\n        1. Недостаточное демпфирование в LC-контурах\r\n        2. Неправильная компенсация в операционных усилителях\r\n        3. Паразитные обратные связи\r\n        4. Резонансные явления\r\n        \r\n        ## Методы повышения стабильности\r\n        \r\n        1. Добавление последовательных резисторов в цепи обратной связи\r\n        2. Использование компенсирующих конденсаторов\r\n        3. Разделение земляных цепей аналоговой и цифровой части\r\n        4. Использование метода доминирующего полюса\r\n        \"\"\"\r\n        \r\n        with open(\"temp_docs/stability_guide.txt\", \"w\") as f:\r\n            f.write(stability_info)\r\n        noise_info = \"\"\"\r\n        # Шумовой анализ электронных схем\r\n        \r\n        Шумовые характеристики определяют минимальный уровень сигнала, который может быть обработан схемой.\r\n        \r\n        ## Основные типы шумов\r\n        \r\n        1. **Тепловой шум** - возникает из-за хаотического движения электронов при ненулевой температуре.\r\n           - Формула: Vn = sqrt(4kTRB), где:\r\n             - k - постоянная Больцмана\r\n             - T - абсолютная температура\r\n             - R - сопротивление\r\n             - B - полоса пропускания\r\n        \r\n        2. **Дробовой шум** - возникает из-за дискретной природы электрического тока.\r\n           - Формула: In = sqrt(2qIB), где:\r\n             - q - заряд электрона\r\n             - I - ток\r\n             - B - полоса пропускания\r\n        \r\n        3. **1/f шум (фликкер-шум)** - шум, спектральная плотность которого обратно пропорциональна частоте.\r\n        \r\n        ## Параметры шумового анализа\r\n        \r\n        1. **Коэффициент шума (NF)** - отношение SNR на входе к SNR на выходе.\r\n           - NF = 1 (0 дБ): идеальная схема без добавления шума\r\n           - NF = 2 (3 дБ): схема добавляет столько же шума, сколько было на входе\r\n        \r\n        2. **Эквивалентная шумовая температура** - характеризует шумовые свойства в температурных единицах.\r\n        \r\n        3. **Спектральная плотность шума** - шум в единичной полосе частот.\r\n        \r\n        ## Типичные значения коэффициента шума\r\n        \r\n        1. Пассивные компоненты (резисторы, конденсаторы): близко к 0 дБ\r\n        2. Малошумящие предусилители: 0.5-2 дБ\r\n        3. Стандартные операционные усилители: 3-10 дБ\r\n        4. Активные смесители: 7-15 дБ\r\n        \r\n        ## Методы снижения шума\r\n        \r\n        1. Использование малошумящих компонентов\r\n        2. Оптимизация импедансов\r\n        3. Экранирование\r\n        4. Фильтрация по питанию\r\n        5. Уменьшение полосы пропускания до необходимого минимума\r\n        \"\"\"\r\n        \r\n        with open(\"temp_docs/noise_analysis.txt\", \"w\") as f:\r\n            f.write(noise_info)\r\n        \r\n        transient_info = \"\"\"\r\n        # Анализ переходных процессов\r\n        \r\n        Переходные процессы характеризуют динамическое поведение схемы при изменении входных сигналов.\r\n        \r\n        ## Основные параметры переходных процессов\r\n        \r\n        1. **Время нарастания (Rise Time)** - время, за которое сигнал возрастает с 10% до 90% от установившегося значения.\r\n           - Типичные значения:\r\n             - Высокоскоростные схемы: <1 нс\r\n             - Стандартные цифровые схемы: 1-10 нс\r\n             - Аналоговые схемы: 0.1-100 мкс\r\n        \r\n        2. **Время спада (Fall Time)** - время, за которое сигнал спадает с 90% до 10% от установившегося значения.\r\n        \r\n        3. **Перерегулирование (Overshoot)** - превышение сигналом установившегося значения, выраженное в процентах.\r\n           - Допустимые значения:\r\n             - Критичные схемы: <5%\r\n             - Стандартные схемы: 5-15%\r\n             - Некритичные схемы: до 30%\r\n        \r\n        4. **Время установления (Settling Time)** - время, необходимое для того, чтобы сигнал вошел и остался в заданной полосе около установившегося значения (обычно ±5% или ±1%).\r\n        \r\n        5. **Задержка распространения (Propagation Delay)** - время между изменением входного сигнала и соответствующим изменением выходного сигнала.\r\n        \r\n        ## Факторы, влияющие на переходные процессы\r\n        \r\n        1. **Постоянные времени цепей** - RC, RL или LC постоянные времени определяют скорость реакции цепи.\r\n        \r\n        2. **Полоса пропускания усилителя** - связана с временем нарастания соотношением Tr ≈ 0.35/BW.\r\n        \r\n        3. **Скорость нарастания (Slew Rate)** - максимальная скорость изменения выходного напряжения усилителя.\r\n        \r\n        4. **Входная и выходная емкость** - паразитные емкости замедляют переходные процессы.\r\n        \r\n        ## Типичные проблемы с переходными процессами\r\n        \r\n        1. Недостаточное демпфирование, приводящее к колебаниям\r\n        2. Ограничение скорости нарастания в операционных усилителях\r\n        3. Искажение формы сигнала из-за нелинейностей\r\n        4. Звон (ringing) на фронтах импульсов\r\n        \r\n        ## Способы улучшения переходных характеристик\r\n        \r\n        1. Оптимизация демпфирования (обычно коэффициент демпфирования 0.7 даёт оптимальный отклик)\r\n        2. Использование быстродействующих компонентов\r\n        3. Минимизация паразитных ёмкостей и индуктивностей\r\n        4. Согласование импедансов для минимизации отражений\r\n        \"\"\"\r\n        \r\n        with open(\"temp_docs/transient_analysis.txt\", \"w\") as f:\r\n            f.write(transient_info)\r\n        frequency_info = \"\"\"\r\n        # Частотный анализ (AC-анализ)\r\n        \r\n        Частотный анализ позволяет оценить поведение схемы в частотной области.\r\n        \r\n        ## Основные характеристики\r\n        \r\n        1. **Амплитудно-частотная характеристика (АЧХ)** - зависимость амплитуды выходного сигнала от частоты входного.\r\n        \r\n        2. **Фазо-частотная характеристика (ФЧХ)** - зависимость фазового сдвига между выходным и входным сигналами от частоты.\r\n        \r\n        3. **Полоса пропускания** - диапазон частот, в котором АЧХ не опускается ниже уровня -3 дБ от максимального.\r\n           - Аудиосхемы: 20 Гц - 20 кГц\r\n           - ВЧ-схемы: до сотен МГц или ГГц\r\n           - Широкополосные усилители: от постоянного тока до десятков МГц\r\n        \r\n        4. **Частота единичного усиления** - частота, на которой коэффициент усиления равен 1 (0 дБ).\r\n        \r\n        5. **Частота среза** - частота, на которой усиление падает на 3 дБ от максимального.\r\n        \r\n        ## Типы частотных характеристик\r\n        \r\n        1. **Фильтр нижних частот (ФНЧ)** - пропускает частоты ниже частоты среза.\r\n           - Скорость спада: 6 дБ/октаву для фильтра 1-го порядка, 12 дБ/октаву для 2-го порядка и т.д.\r\n        \r\n        2. **Фильтр верхних частот (ФВЧ)** - пропускает частоты выше частоты среза.\r\n        \r\n        3. **Полосовой фильтр** - пропускает частоты в определенной полосе.\r\n           - Характеризуется центральной частотой и добротностью (Q)\r\n           - Q = f0 / (f2 - f1), где f0 - центральная частота, f1 и f2 - нижняя и верхняя частоты среза\r\n        \r\n        4. **Режекторный фильтр** - не пропускает частоты в определенной полосе.\r\n        \r\n        ## Типичные применения частотного анализа\r\n        \r\n        1. Определение стабильности усилителей\r\n        2. Характеризация фильтров\r\n        3. Анализ цепей обратной связи\r\n        4. Оценка помехоустойчивости\r\n        \r\n        ## Соотношения между параметрами\r\n        \r\n        1. Время нарастания ≈ 0.35 / полоса пропускания (для ФНЧ)\r\n        2. Задержка группы = -dφ/dω, где φ - фаза, ω - угловая частота\r\n        3. Частота среза RC-цепи = 1/(2πRC)\r\n        \"\"\"\r\n        \r\n        with open(\"temp_docs/frequency_analysis.txt\", \"w\") as f:\r\n            f.write(frequency_info)\r\n        monte_carlo_info = \"\"\"\r\n        # Анализ Монте-Карло\r\n        \r\n        Анализ Монте-Карло позволяет оценить влияние разброса параметров компонентов на работу схемы.\r\n        \r\n        ## Основные принципы\r\n        \r\n        1. **Суть метода** - многократное моделирование схемы со случайным разбросом параметров компонентов согласно их допускам.\r\n        \r\n        2. **Распределения параметров**:\r\n           - Равномерное: все значения в диапазоне допуска равновероятны\r\n           - Нормальное (гауссово): бóльшая вероятность значений ближе к номиналу\r\n           - Лог-нормальное: для параметров, которые могут меняться в широком диапазоне\r\n        \r\n        3. **Типичное количество итераций**:\r\n           - Базовая оценка: 50-100 прогонов\r\n           - Детальное исследование: 500-1000 прогонов\r\n           - Критические схемы: 1000+ прогонов\r\n        \r\n        ## Типичные допуски компонентов\r\n        \r\n        1. **Резисторы**:\r\n           - Прецизионные: ±0.1%, ±0.5%, ±1%\r\n           - Стандартные: ±5%, ±10%\r\n        \r\n        2. **Конденсаторы**:\r\n           - Керамические: ±5%, ±10%, ±20%\r\n           - Электролитические: -20%/+80% (или хуже)\r\n           - Пленочные: ±1%, ±5%, ±10%\r\n        \r\n        3. **Полупроводники**:\r\n           - Коэффициент усиления транзисторов: часто ±50% или больше\r\n           - Пороговые напряжения: обычно ±10-20%\r\n        \r\n        ## Анализируемые параметры\r\n        \r\n        1. **Аналоговые схемы**:\r\n           - Коэффициент усиления\r\n           - Частота среза\r\n           - Стабильность\r\n           - Шумовые характеристики\r\n           - Смещение\r\n        \r\n        2. **Цифровые схемы**:\r\n           - Задержки распространения\r\n           - Времена нарастания/спада\r\n           - Параметры фронтов\r\n        \r\n        3. **Смешанные схемы**:\r\n           - Разрешение АЦП/ЦАП\r\n           - Линейность\r\n           - Джиттер\r\n        \r\n        ## Интерпретация результатов\r\n        \r\n        1. **Статистические параметры**:\r\n           - Среднее значение\r\n           - Стандартное отклонение\r\n           - Минимальное и максимальное значения\r\n           - Гистограммы распределения\r\n        \r\n        2. **Критерии качества**:\r\n           - Выход годных (Yield): процент схем, которые соответствуют спецификации\r\n           - Запас по критическим параметрам\r\n        \r\n        3. **Анализ чувствительности**: определение компонентов, которые требуют более жестких допусков\r\n        \r\n        ## Улучшение выхода годных\r\n        \r\n        1. Использование прецизионных компонентов в критичных узлах\r\n        2. Разработка схем с пониженной чувствительностью к разбросу параметров\r\n        3. Калибровка или подстройка в процессе производства\r\n        4. Применение схем автоматической компенсации\r\n        \"\"\"\r\n        \r\n        with open(\"temp_docs/monte_carlo.txt\", \"w\") as f:\r\n            f.write(monte_carlo_info)\r\n        \r\n        # Файл с типовыми схемами и их характеристиками (в формате CSV)\r\n        typical_circuits_data = \"\"\"Circuit Type,Application,Key Parameters,Typical Issues,Optimization Tips\r\nИнвертирующий ОУ,Усиление сигналов,Коэффициент усиления, полоса пропускания,Ограничение скорости нарастания,Выбор ОУ с достаточной скоростью нарастания\r\nНеинвертирующий ОУ,Буферизация и усиление,Входное сопротивление, точность усиления,Смещение нуля при большом Ku,Использование прецизионных ОУ для высоких Ku\r\nДифференциальный усилитель,Измерительная техника,КОСС, точность усиления,Несогласованность резисторов,Использование прецизионных согласованных резисторов\r\nФильтр Баттерворта 2-го порядка,Фильтрация сигналов,Частота среза, скорость спада АЧХ,Чувствительность к разбросу параметров,Настройка с помощью переменных резисторов\r\nПолосовой фильтр ГиС,Фильтрация узкой полосы,Добротность, центральная частота,Высокая чувствительность к компонентам,Использование высококачественных индуктивностей\r\nLC-генератор,Генерация синусоидальных сигналов,Стабильность частоты, искажения,Зависимость от температуры,Термокомпенсация и стабилизация амплитуды\r\nМультивибратор на ОУ,Генерация прямоугольных сигналов,Частота, скважность,Джиттер при низкой частоте,Использование прецизионных компараторов\r\nМалошумящий предусилитель,Усиление слабых сигналов,Коэффициент шума, усиление,Наводки и шумы питания,Тщательное экранирование и фильтрация питания\r\nИсточник опорного напряжения,Создание эталонного напряжения,Температурный коэффициент, стабильность,Дрейф с температурой,Выбор компонентов с противоположными ТКН\r\nИмпульсный преобразователь,Преобразование напряжения,КПД, пульсации, ЭМИ,Электромагнитные помехи,Правильная компоновка и фильтрация\r\n\"\"\"\r\n        \r\n        with open(\"temp_docs/typical_circuits.csv\", \"w\") as f:\r\n            f.write(typical_circuits_data)\r\n        \r\n        # Создаем базу знаний из временных файлов\r\n        result = build_knowledge_base(\"temp_docs\", \"circuit_knowledge_base\")\r\n        \r\n        # Удаляем временные файлы\r\n        for file in os.listdir(\"temp_docs\"):\r\n            os.remove(os.path.join(\"temp_docs\", file))\r\n        os.rmdir(\"temp_docs\")\r\n        \r\n        return result\r\n    except Exception as e:\r\n        return {\"status\": \"error\", \"message\": f\"Ошибка при создании базы знаний: {str(e)}\"}\r\n        \r\ndef rag_enhanced_analysis(query, circuit_type=None, kb_path=\"circuit_knowledge_base\"):\r\n    \"\"\"\r\n    Выполняет поиск в базе знаний для дополнения анализа схемы.\r\n    \r\n    Args:\r\n        query: Запрос пользователя или контекст анализа\r\n        circuit_type: Тип схемы (если известен)\r\n        kb_path: Путь к базе знаний\r\n    \r\n    Returns:\r\n        Дополнительная информация для обогащения ответа\r\n    \"\"\"\r\n    if not os.path.exists(kb_path):\r\n        create_result = create_sample_circuit_knowledge()\r\n        if create_result[\"status\"] != \"success\":\r\n            return {\r\n                \"status\": \"error\",\r\n                \"message\": \"База знаний не найдена и не может быть создана. Используем только базовые знания модели.\"\r\n            }\r\n    search_query = query\r\n    if circuit_type:\r\n        search_query = f\"{search_query} {circuit_type}\"\r\n    analysis_terms = []\r\n    if \"стабильность\" in query.lower() or \"устойчивость\" in query.lower():\r\n        analysis_terms.extend([\"запас по фазе\", \"запас по усилению\", \"стабильность усилителя\"])\r\n    if \"шум\" in query.lower() or \"помех\" in query.lower():\r\n        analysis_terms.extend([\"шумовой анализ\", \"коэффициент шума\", \"шумовая температура\"])\r\n    if \"переход\" in query.lower() or \"перерегулирование\" in query.lower():\r\n        analysis_terms.extend([\"переходный процесс\", \"время нарастания\", \"перерегулирование\"])\r\n    if \"частот\" in query.lower() or \"ачх\" in query.lower() or \"фчх\" in query.lower():\r\n        analysis_terms.extend([\"АЧХ\", \"ФЧХ\", \"полоса пропускания\", \"частотный анализ\"])\r\n    if \"монте\" in query.lower() or \"разброс\" in query.lower() or \"допуск\" in query.lower():\r\n        analysis_terms.extend([\"Монте-Карло\", \"разброс параметров\", \"статистический анализ\"])\r\n    all_results = []\r\n    for term in analysis_terms:\r\n        results = search_knowledge_base(term, kb_path, top_k=2)\r\n        if results.get(\"status\") == \"success\" and results.get(\"results\"):\r\n            all_results.extend(results[\"results\"])\r\n    if not all_results:\r\n        results = search_knowledge_base(search_query, kb_path, top_k=3)\r\n        if results.get(\"status\") == \"success\" and results.get(\"results\"):\r\n            all_results = results[\"results\"]\r\n            \r\n    unique_contents = set()\r\n    unique_results = []\r\n    for result in all_results:\r\n        if result[\"content\"] not in unique_contents:\r\n            unique_contents.add(result[\"content\"])\r\n            unique_results.append(result)\r\n    additional_info = \"\"\r\n    if unique_results:\r\n        additional_info = \"### Дополнительная информация из технической документации:\\n\\n\"\r\n        for i, result in enumerate(unique_results[:5]): \r\n            content = result[\"content\"].strip()\r\n            source = result.get(\"source\", \"техническая документация\")\r\n            page = f\", стр. {result['page']}\" if result.get(\"page\") else \"\"\r\n            \r\n            additional_info += f\"**{i+1}. {source}{page}:**\\n{content}\\n\\n\"\r\n    else:\r\n        additional_info = \"К сожалению, в базе знаний не найдено дополнительной информации по данному запросу.\"\r\n    \r\n    return {\r\n        \"status\": \"success\",\r\n        \"additional_info\": additional_info\r\n    }\r\n\r\ndef combine_analysis_with_rag(analysis_results, query, circuit_name=None):\r\n    \"\"\"\r\n    Объединяет результаты анализа схемы с дополнительной информацией из RAG.\r\n    \r\n    Args:\r\n        analysis_results: Результаты анализа схемы\r\n        query: Исходный запрос пользователя\r\n        circuit_name: Название схемы (если известно)\r\n    \r\n    Returns:\r\n        Комбинированный отчет\r\n    \"\"\"\r\n    circuit_type = None\r\n    if circuit_name:\r\n        if \"op_amp\" in circuit_name.lower() or \"operational\" in circuit_name.lower():\r\n            circuit_type = \"операционный усилитель\"\r\n        elif \"filter\" in circuit_name.lower() or \"фильтр\" in circuit_name.lower():\r\n            circuit_type = \"фильтр\"\r\n        elif \"power\" in circuit_name.lower() or \"питание\" in circuit_name.lower():\r\n            circuit_type = \"источник питания\"\r\n        elif \"oscillator\" in circuit_name.lower() or \"генератор\" in circuit_name.lower():\r\n            circuit_type = \"генератор\"\r\n    \r\n    rag_info = rag_enhanced_analysis(query, circuit_type)\r\n    \r\n    if isinstance(analysis_results, dict) and analysis_results.get(\"summary_table\"):\r\n        combined_report = f\"## Результаты анализа схемы {circuit_name or ''}\\n\\n\"\r\n        combined_report += analysis_results.get(\"summary_table\", \"\") + \"\\n\\n\"\r\n        combined_report += \"## Выводы\\n\\n\"\r\n        if \"stability\" in analysis_results.get(\"summary\", {}):\r\n            stability_info = analysis_results[\"summary\"][\"stability\"]\r\n            stable_percent = stability_info.get(\"stable_percentage\", 0)\r\n            if stable_percent >= 90:\r\n                combined_report += \"✅ Схема имеет отличную стабильность.\\n\"\r\n            elif stable_percent >= 70:\r\n                combined_report += \"✅ Схема имеет хорошую стабильность, но есть потенциал для улучшения.\\n\"\r\n            else:\r\n                combined_report += \"⚠️ Схема имеет недостаточную стабильность, рекомендуется доработка.\\n\"\r\n        \r\n        if \"frequency\" in analysis_results.get(\"summary\", {}):\r\n            freq_info = analysis_results[\"summary\"][\"frequency\"]\r\n            if freq_info.get(\"bandwidth\"):\r\n                combined_report += f\"📊 Полоса пропускания: {freq_info['bandwidth']:.2f} Гц.\\n\"\r\n            if freq_info.get(\"max_gain\"):\r\n                combined_report += f\"📈 Максимальное усиление: {freq_info['max_gain']:.2f} дБ.\\n\"\r\n        \r\n        if \"monte_carlo\" in analysis_results.get(\"summary\", {}):\r\n            mc_info = analysis_results[\"summary\"][\"monte_carlo\"]\r\n            combined_report += \"🔄 Результаты анализа Монте-Карло показывают:\\n\"\r\n            \r\n            if \"rise_time\" in mc_info:\r\n                rt_info = mc_info[\"rise_time\"]\r\n                combined_report += f\"  - Время нарастания: {rt_info['mean']:.2e} ± {rt_info['std']:.2e} с\\n\"\r\n            \r\n            if \"max_gain\" in mc_info:\r\n                gain_info = mc_info[\"max_gain\"]\r\n                combined_report += f\"  - Усиление: {gain_info['mean']:.2f} ± {gain_info['std']:.2f} дБ\\n\"\r\n        \r\n        if rag_info.get(\"status\") == \"success\" and rag_info.get(\"additional_info\"):\r\n            combined_report += \"\\n\" + rag_info[\"additional_info\"]\r\n    else:\r\n        combined_report = f\"## Результаты анализа\\n\\n\"\r\n        \r\n        if isinstance(analysis_results, dict):\r\n            for key, value in analysis_results.items():\r\n                combined_report += f\"### {key}\\n{value}\\n\\n\"\r\n        else:\r\n            combined_report += str(analysis_results) + \"\\n\\n\"\r\n        \r\n        if rag_info.get(\"status\") == \"success\" and rag_info.get(\"additional_info\"):\r\n            combined_report += \"\\n\" + rag_info[\"additional_info\"]\r\n    \r\n    return combined_report\r\n        \r\n",
+                "display_name": "Python Code",
+                "advanced": false,
+                "dynamic": false,
+                "info": "The Python code to execute. Only modules specified in Global Imports can be used.",
+                "title_case": false,
+                "type": "code",
+                "_input_type": "CodeInput"
+              },
+              "tools_metadata": {
+                "tool_mode": false,
+                "is_list": true,
+                "list_add_label": "Add More",
+                "table_schema": {
+                  "columns": [
+                    {
+                      "name": "name",
+                      "display_name": "Tool Name",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "Specify the name of the tool.",
+                      "default": "None",
+                      "disable_edit": false,
+                      "edit_mode": "inline",
+                      "hidden": false
+                    },
+                    {
+                      "name": "description",
+                      "display_name": "Tool Description",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "Describe the purpose of the tool.",
+                      "default": "None",
+                      "disable_edit": false,
+                      "edit_mode": "popover",
+                      "hidden": false
+                    },
+                    {
+                      "name": "tags",
+                      "display_name": "Tool Identifiers",
+                      "sortable": false,
+                      "filterable": false,
+                      "formatter": "text",
+                      "type": "str",
+                      "description": "The default identifiers for the tools and cannot be changed.",
+                      "default": "None",
+                      "disable_edit": true,
+                      "edit_mode": "inline",
+                      "hidden": true
+                    }
+                  ]
+                },
+                "trigger_text": "",
+                "trigger_icon": "Hammer",
+                "table_icon": "Hammer",
+                "table_options": {
+                  "block_add": true,
+                  "block_delete": true,
+                  "block_edit": true,
+                  "block_sort": true,
+                  "block_filter": true,
+                  "block_hide": true,
+                  "block_select": true,
+                  "hide_options": true,
+                  "field_parsers": {
+                    "name": [
+                      "snake_case",
+                      "no_blank"
+                    ],
+                    "commands": "commands"
+                  },
+                  "description": "Modify tool names and descriptions to help agents understand when to use each tool."
+                },
+                "trace_as_metadata": true,
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "tools_metadata",
+                "value": [
+                  {
+                    "name": "PythonREPLComponent-run_python_repl",
+                    "description": "run_python_repl(global_imports: str, python_code: code) - A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
+                    "tags": [
+                      "PythonREPLComponent-run_python_repl"
+                    ]
+                  }
+                ],
+                "display_name": "Edit tools",
+                "advanced": false,
+                "dynamic": false,
+                "info": "",
+                "real_time_refresh": true,
+                "title_case": false,
+                "type": "table",
+                "_input_type": "TableInput"
+              }
+            },
+            "description": "A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
+            "icon": "Python",
+            "base_classes": [
+              "Data"
+            ],
+            "display_name": "Python REPL",
+            "documentation": "",
+            "minimized": false,
+            "custom_fields": {},
+            "output_types": [],
+            "pinned": false,
+            "conditional_paths": [],
+            "frozen": false,
+            "outputs": [
+              {
+                "types": [
+                  "Tool"
+                ],
+                "selected": "Tool",
+                "name": "component_as_tool",
+                "hidden": null,
+                "display_name": "Toolset",
+                "method": "to_toolkit",
+                "value": "__UNDEFINED__",
+                "cache": true,
+                "required_inputs": null,
+                "allows_loop": false,
+                "tool_mode": true
+              }
+            ],
+            "field_order": [
+              "global_imports",
+              "python_code"
+            ],
+            "beta": false,
+            "legacy": false,
+            "edited": false,
+            "metadata": {},
+            "tool_mode": true,
+            "category": "tools",
+            "key": "PythonREPLComponent",
+            "score": 0.15257532871405305
+          },
+          "showNode": true,
+          "type": "PythonREPLComponent",
+          "id": "PythonREPLComponent-6DMo2"
+        },
+        "selected": false,
+        "measured": {
+          "width": 320,
+          "height": 461
+        },
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "GoogleGenerativeAIModel-jfzBY",
+        "sourceHandle": "{œdataTypeœ:œGoogleGenerativeAIModelœ,œidœ:œGoogleGenerativeAIModel-jfzBYœ,œnameœ:œmodel_outputœ,œoutput_typesœ:[œLanguageModelœ]}",
+        "target": "ToolCallingAgent-nJMXM",
+        "targetHandle": "{œfieldNameœ:œllmœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œLanguageModelœ],œtypeœ:œotherœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "llm",
+            "id": "ToolCallingAgent-nJMXM",
+            "inputTypes": [
+              "LanguageModel"
+            ],
+            "type": "other"
+          },
+          "sourceHandle": {
+            "dataType": "GoogleGenerativeAIModel",
+            "id": "GoogleGenerativeAIModel-jfzBY",
+            "name": "model_output",
+            "output_types": [
+              "LanguageModel"
+            ]
+          }
+        },
+        "id": "reactflow__edge-GoogleGenerativeAIModel-jfzBY{œdataTypeœ:œGoogleGenerativeAIModelœ,œidœ:œGoogleGenerativeAIModel-jfzBYœ,œnameœ:œmodel_outputœ,œoutput_typesœ:[œLanguageModelœ]}-ToolCallingAgent-nJMXM{œfieldNameœ:œllmœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œLanguageModelœ],œtypeœ:œotherœ}",
+        "className": ""
+      },
+      {
+        "source": "ChatInput-9hVfd",
+        "sourceHandle": "{œdataTypeœ:œChatInputœ,œidœ:œChatInput-9hVfdœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "Prompt-c6a6y",
+        "targetHandle": "{œfieldNameœ:œinputœ,œidœ:œPrompt-c6a6yœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "input",
+            "id": "Prompt-c6a6y",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          },
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-9hVfd",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          }
+        },
+        "id": "reactflow__edge-ChatInput-9hVfd{œdataTypeœ:œChatInputœ,œidœ:œChatInput-9hVfdœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}-Prompt-c6a6y{œfieldNameœ:œinputœ,œidœ:œPrompt-c6a6yœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "className": ""
+      },
+      {
+        "source": "Prompt-c6a6y",
+        "sourceHandle": "{œdataTypeœ:œPromptœ,œidœ:œPrompt-c6a6yœ,œnameœ:œpromptœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "ToolCallingAgent-nJMXM",
+        "targetHandle": "{œfieldNameœ:œsystem_promptœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "system_prompt",
+            "id": "ToolCallingAgent-nJMXM",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          },
+          "sourceHandle": {
+            "dataType": "Prompt",
+            "id": "Prompt-c6a6y",
+            "name": "prompt",
+            "output_types": [
+              "Message"
+            ]
+          }
+        },
+        "id": "reactflow__edge-Prompt-c6a6y{œdataTypeœ:œPromptœ,œidœ:œPrompt-c6a6yœ,œnameœ:œpromptœ,œoutput_typesœ:[œMessageœ]}-ToolCallingAgent-nJMXM{œfieldNameœ:œsystem_promptœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "className": ""
+      },
+      {
+        "source": "ToolCallingAgent-nJMXM",
+        "sourceHandle": "{œdataTypeœ:œToolCallingAgentœ,œidœ:œToolCallingAgent-nJMXMœ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "ChatOutput-zu1DT",
+        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-zu1DTœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-zu1DT",
+            "inputTypes": [
+              "Data",
+              "DataFrame",
+              "Message"
+            ],
+            "type": "other"
+          },
+          "sourceHandle": {
+            "dataType": "ToolCallingAgent",
+            "id": "ToolCallingAgent-nJMXM",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          }
+        },
+        "id": "reactflow__edge-ToolCallingAgent-nJMXM{œdataTypeœ:œToolCallingAgentœ,œidœ:œToolCallingAgent-nJMXMœ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-ChatOutput-zu1DT{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-zu1DTœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}",
+        "className": ""
+      },
+      {
+        "source": "PythonREPLComponent-6DMo2",
+        "sourceHandle": "{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-6DMo2œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}",
+        "target": "ToolCallingAgent-nJMXM",
+        "targetHandle": "{œfieldNameœ:œtoolsœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "ToolCallingAgent-nJMXM",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "other"
+          },
+          "sourceHandle": {
+            "dataType": "PythonREPLComponent",
+            "id": "PythonREPLComponent-6DMo2",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          }
+        },
+        "id": "xy-edge__PythonREPLComponent-6DMo2{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-6DMo2œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}-ToolCallingAgent-nJMXM{œfieldNameœ:œtoolsœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "className": ""
+      },
+      {
+        "source": "PythonREPLComponent-o0w88",
+        "sourceHandle": "{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-o0w88œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}",
+        "target": "ToolCallingAgent-nJMXM",
+        "targetHandle": "{œfieldNameœ:œtoolsœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "data": {
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "ToolCallingAgent-nJMXM",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "other"
+          },
+          "sourceHandle": {
+            "dataType": "PythonREPLComponent",
+            "id": "PythonREPLComponent-o0w88",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          }
+        },
+        "id": "xy-edge__PythonREPLComponent-o0w88{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-o0w88œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}-ToolCallingAgent-nJMXM{œfieldNameœ:œtoolsœ,œidœ:œToolCallingAgent-nJMXMœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "className": ""
+      }
+    ],
+    "viewport": {
+      "x": -1090.8215620560502,
+      "y": 206.12965444015651,
+      "zoom": 1.0084443016288673
+    }
+  },
+  "icon_bg_color": null,
+  "user_id": "f730c717-e79a-4a95-b0ba-857317c5f46c",
+  "gradient": null,
+  "icon": null,
+  "is_component": false,
+  "tags": null,
+  "updated_at": "2025-03-22T02:24:05+00:00",
+  "locked": false,
+  "webhook": false,
+  "folder_id": "c332da38-685b-46ee-af2b-bc2370a2239f"
+}
